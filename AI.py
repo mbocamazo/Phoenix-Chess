@@ -5,7 +5,7 @@ Created on Mar 28, 2014
 
 AI for chess
 '''
-from Chess_Implementation import ChessBoard
+import ChessBoard
 
 class AI():
     BOARDWIDTH = 8
