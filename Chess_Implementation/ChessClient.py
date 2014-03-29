@@ -1,7 +1,7 @@
 #/usr/bin/env python
 
 from ChessBoard import ChessBoard
-
+import AI
 import os, pygame,math
 from pygame.locals import *
 
