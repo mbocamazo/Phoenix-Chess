@@ -7,6 +7,21 @@ from pygame.locals import *
 
 from pprint import pprint
 
+class Player:
+    def __init__(self,color):
+        self.color = color
+        
+class Human(Player):
+    def __init__(self,color,board_model):
+        super(Player,self).__init__(color)
+        self.board_model = board_model
+        
+    def get_next_move(self,event):
+                                
+    def make_next_move(event):
+        move = self.get_next_move(event)
+        board_model.addMove(move)
+
 class ChessClient:
 
     def mainLoop(self):    
