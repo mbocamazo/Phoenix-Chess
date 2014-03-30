@@ -32,7 +32,7 @@ class ChessClient:
         gameResults = ["","WHITE WINS!","BLACK WINS!","STALEMATE","DRAW BY THE FIFTY MOVES RULE","DRAW BY THE THREE REPETITION RULE"]
         
         while running:
-            clock.tick(300)        
+            clock.tick(30)        
     
             for event in pygame.event.get():
                 if event.type == QUIT:
@@ -129,8 +129,8 @@ class ChessClient:
 
 class PyGameWindowView:
     """Renders the state of the view and contains draw functions"""
-    def __init__(self,model,screen):
-        self.chess = ChessBoard()
+    def __init__(self,chess,screen):
+        self.chess = chess
         self.board = self.chess.getBoard()
         self.turn = self.chess.getTurn()
         self.screen = screen
@@ -183,10 +183,7 @@ class PyGameWindowView:
         if self.chess.markPos[0] != -1:
             self.chess.posRect.left = self.chess.markPos[0]*60
             self.chess.posRect.top = self.chess.markPos[1]*60
-            pygame.draw.rect(self.screen, (255,255,0),self.chess.posRect, 4)
-            print "yes"
-        print "No"
-        
+            pygame.draw.rect(self.screen, (255,255,0),self.chess.posRect, 4)        
             
     def drawHighlights(self,chess):
         """Draws highlighted possible move squares"""
