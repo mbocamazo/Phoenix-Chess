@@ -1,7 +1,7 @@
 '''
 Created on Mar 28, 2014
 
-@author: dchen and mbocomazo
+@author: dchen and mbocamazo
 
 AI for chess
 '''
