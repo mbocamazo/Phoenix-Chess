@@ -11,41 +11,39 @@ class Player:
     def __init__(self,color):
         self.color = color
         
-class Human(Player):
-    def __init__(self,color,board_model):
-        super(Player,self).__init__(color)
-        self.board_model = board_model
-        
-    def get_next_move(self,event):
-        pass
-                                
-    def make_next_move(event):
-        move = self.get_next_move(event)
-        board_model.addMove(move)
+#class Human(Player):
+#    def __init__(self,color,board_model):
+#        super(Player,self).__init__(color)
+#        self.board_model = board_model
+#        
+#    def get_next_move(self,event):
+#        pass
+#                                
+#    def make_next_move(event):
+#        move = self.get_next_move(event)
+#        board_model.addMove(move)
 
 class ChessClient:
 
     def mainLooptemp(self):    
         
         chess = ChessBoard()
-        board = chess.getBoard()
-        turn = chess.getTurn()
 
         clock = pygame.time.Clock()
         screen = pygame.display.set_mode((480, 480),1)
         pygame.display.set_caption('ChessBoard Client')
         view = PyGameWindowView(chess,screen)
+        controller = Controller(chess)        
         
         running = True
         
 #        posRect = pygame.Rect(0,0,60,60)
-        posRect = chess.posRect
-
-        mousePos = chess.mousePos
-        markPos = chess.markPos
-        validMoves = chess.validMoves
-        
-        gameResults = ["","WHITE WINS!","BLACK WINS!","STALEMATE","DRAW BY THE FIFTY MOVES RULE","DRAW BY THE THREE REPETITION RULE"]
+#        AI_color = ChessBoard.BLACK
+        player_color = ChessBoard.WHITE
+        human_player = Player(player_color)
+#        AI = (AI_color)    
+        player_2_color = ChessBoard.BLACK
+        human_player_2 = Player(player_2_color)
         
         while running:
             clock.tick(30)        
@@ -55,69 +53,22 @@ class ChessClient:
                     running = False
                     pygame.quit()
                     return
-                elif event.type == KEYDOWN:
-                    if event.key == K_ESCAPE:
-                        return
-                    elif event.key == K_LEFT:
-                        chess.undo()
-                    elif event.key == K_RIGHT:
-                        chess.redo()
-                    elif event.unicode in ("f","F"):
-                        print chess.getFEN()
-                    elif event.unicode in ("a","A"):
-                        an = chess.getAllTextMoves(chess.AN)
-                        if an:
-                            print "AN: " + ", ".join(an)
-                    elif event.unicode in ("s","S"):
-                        san = chess.getAllTextMoves(chess.SAN)
-                        if san:
-                            print "SAN: " + ", ".join(san)
-                    elif event.unicode in ("l","L"):
-                        lan = chess.getAllTextMoves(chess.LAN)
-                        if lan:
-                            print "LAN: " + ", ".join(lan)
-                    board = chess.getBoard()
-                    turn = chess.getTurn()
-                    markPos[0] = -1
-                    validMoves = [] 
-                        
-                if not chess.isGameOver():
-                    if event.type == MOUSEMOTION:
-                        mx = event.pos[0]
-                        my = event.pos[1]
-                        mousePos[0] = mx/60
-                        mousePos[1] = my/60
-                    elif event.type == MOUSEBUTTONDOWN:
-                        if mousePos[0] != -1:
-                            if markPos[0] == mousePos[0] and markPos[1] == mousePos[1]:
-                                markPos[0] = -1
-                                validMoves = []
-                            else: 
-                                if (turn==ChessBoard.WHITE and board[mousePos[1]][mousePos[0]].isupper()) or \
-                                   (turn==ChessBoard.BLACK and board[mousePos[1]][mousePos[0]].islower()):    
-                                    markPos[0] = mousePos[0]
-                                    markPos[1] = mousePos[1]
-                                    validMoves = chess.getValidMoves(tuple(markPos))
-                                    
-                                else:
-                                    if markPos[0] != -1:
-                                        res = chess.addMove(markPos,mousePos)
-                                        if not res and chess.getReason() == chess.MUST_SET_PROMOTION:
-                                            chess.setPromotion(chess.QUEEN)                                                
-                                            res = chess.addMove(markPos,mousePos)                                            
-                                        if res:
-                                            #print chess.getLastMove()
-                                            print chess.getLastTextMove(chess.SAN)
-                                            board = chess.getBoard()
-                                            turn = chess.getTurn()
-                                            markPos[0] = -1
-                                            validMoves = [] 
-
+                elif chess.getTurn() == human_player.color:
+                    controller.handle_event(event)   
+                elif chess.getTurn() == human_player_2.color:
+                    controller.handle_event(event)                             
+                    
+            #multithread in python to be able to make calculations and quit during player's turn
+            
+#            if chess.getTurn() == AI.color:
+#                    turn = machine.get_turn()
+#                    board.updatewithMachine'sturn
+                    
             if chess.isGameOver():
-                pygame.display.set_caption("Game Over! (Reason:%s)" % gameResults[chess.getGameResult()])
-                validMoves = []
-                markPos[0] = -1
-                markPos[1] = -1
+                view.end_game_display()
+                chess.validMoves = []
+                self.chess.markPos[0] = -1
+                self.chess.markPos[1] = -1
             else:
                 pygame.display.set_caption('ChessBoard Client') 
                                             
@@ -142,9 +93,81 @@ class ChessClient:
                                        
             pygame.display.flip()  
         pygame.quit()
+        
+class Controller:
+    def __init__(self,chess):
+        self.chess = chess
+        self.board = chess.getBoard()
+        
+    def handle_event(self,event):
+        self.board = self.chess.getBoard()
+        if event.type == KEYDOWN:
+            if event.key == K_ESCAPE:
+                return
+            elif event.key == K_LEFT:
+                self.chess.undo()
+            elif event.key == K_RIGHT:
+                self.chess.redo()
+            elif event.unicode in ("f","F"):
+                print self.chess.getFEN()
+            elif event.unicode in ("a","A"):
+                an = self.chess.getAllTextMoves(self.chess.AN)
+                if an:
+                    print "AN: " + ", ".join(an)
+            elif event.unicode in ("s","S"):
+                san = self.chess.getAllTextMoves(self.chess.SAN)
+                if san:
+                    print "SAN: " + ", ".join(san)
+            elif event.unicode in ("l","L"):
+                lan = self.chess.getAllTextMoves(self.chess.LAN)
+                if lan:
+                    print "LAN: " + ", ".join(lan)
+            board = self.chess.getBoard()
+            turn = self.chess.getTurn()
+            self.chess.markPos[0] = -1
+            self.chess.validMoves = [] 
+                
+        if not self.chess.isGameOver():
+            if event.type == MOUSEMOTION:
+                mx = event.pos[0]
+                my = event.pos[1]
+                self.chess.mousePos[0] = mx/60
+                self.chess.mousePos[1] = my/60
+            elif event.type == MOUSEBUTTONDOWN:
+                if self.chess.mousePos[0] != -1:
+                    if self.chess.markPos[0] == self.chess.mousePos[0] and self.chess.markPos[1] == self.chess.mousePos[1]:
+                        print "deselect the square!"
+                        self.chess.markPos[0] = -1
+                        self.chess.validMoves = []
+                    else: 
+                        print "new square selected"
+                        #if its your turn, you haven't selected any pieces yet, and the piece you clicked on is your own piece
+                        if (self.chess.getTurn()==ChessBoard.WHITE and self.board[self.chess.mousePos[1]][self.chess.mousePos[0]].isupper()) or \
+                           (self.chess.getTurn()==ChessBoard.BLACK and self.board[self.chess.mousePos[1]][self.chess.mousePos[0]].islower()): 
+                            print "this piece is mine!"
+                            self.chess.markPos[0] = self.chess.mousePos[0]
+                            self.chess.markPos[1] = self.chess.mousePos[1]
+                            #sets the selected piece position equal to the mouse position
+                            self.chess.validMoves = self.chess.getValidMoves(tuple(self.chess.markPos))
+                            
+                        else:
+                            if self.chess.markPos[0] != -1:
+                                res = self.chess.addMove(self.chess.markPos,self.chess.mousePos)
+                                if not res and self.chess.getReason() == self.chess.MUST_SET_PROMOTION:
+                                    self.chess.setPromotion(self.chess.QUEEN)                                                
+                                    res = self.chess.addMove(self.chess.markPos,self.chess.mousePos)                                            
+                                if res:
+                                    #print chess.getLastMove()
+                                    print self.chess.getLastTextMove(self.chess.SAN)
+                                    board = self.chess.getBoard()
+                                    turn = self.chess.getTurn()
+                                    self.chess.markPos[0] = -1
+                                    self.chess.validMoves = [] 
+
 
 class PyGameWindowView:
     """Renders the state of the view and contains draw functions"""
+    gameResults = ["","WHITE WINS!","BLACK WINS!","STALEMATE","DRAW BY THE FIFTY MOVES RULE","DRAW BY THE THREE REPETITION RULE"]
     def __init__(self,chess,screen):
         self.chess = chess
         self.board = self.chess.getBoard()
@@ -179,6 +202,7 @@ class PyGameWindowView:
         self.pieces[1]["Q"] = pygame.image.load("./img/wqb.png")                
         self.pieces[1]["P"] = pygame.image.load("./img/wpb.png")                
         self.pieces[1]["."] = pygame.image.load("./img/b.png") 
+        
                 
 #        self.posRect = pygame.Rect(0,0,60,60)
 #        self.mousePos = [-1,-1]
@@ -203,6 +227,7 @@ class PyGameWindowView:
             
     def drawHighlights(self,chess):
         """Draws highlighted possible move squares"""
+        #print len(self.chess.validMoves)        
         for v in self.chess.validMoves:
             self.chess.posRect.left = v[0]*60
             self.chess.posRect.top = v[1]*60
@@ -215,6 +240,13 @@ class PyGameWindowView:
         self.drawPieces(chess)
         self.drawMarkPos(chess)
         self.drawHighlights(chess)
+        self.title_game_display(chess)
+        
+    def title_game_display(self,chess):
+        if chess.isGameOver():
+            pygame.display.set_caption("Game Over! (Reason:%s)" % self.gameResults[chess.getGameResult()])
+        else:
+            pygame.display.set_caption('ChessBoard Client') 
             
 def main():
     pygame.init()
