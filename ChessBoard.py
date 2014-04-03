@@ -398,16 +398,6 @@ class ChessBoard:
         if fx > 0 and self.getColor(fx-1,fy+movedir) == ocol:
             moves.append((fx-1,fy+movedir))
             
-        #inclusion of promotion moves and captures as valid move
-        if fy == promorow:
-            if self.isFree(fx,fy+movedir):
-                specialMoves[(fx,fy+movedir)] = self.PROMOTION_MOVE
-            if self.getColor(fx+1,fy+movedir) == ocol:
-                specialMoves[(fx+1,fy+movedir)] = self.PROMOTION_MOVE
-            if self.getColor(fx-1,fy+movedir) == ocol:
-                specialMoves[(fx-1,fy+movedir)] = self.PROMOTION_MOVE
-
-            
         if fy == eprow and self._ep[1] != 0:
             if self._ep[0] == fx+1:
                moves.append((fx+1,fy+movedir))
@@ -415,6 +405,22 @@ class ChessBoard:
             if self._ep[0] == fx-1:
                moves.append((fx-1,fy+movedir))
                specialMoves[(fx-1,fy+movedir)] = self.EP_CAPTURE_MOVE
+               
+        if fy == promorow:
+            if self.isFree(fx,fy+movedir):
+                specialMoves[(fx,fy+movedir)] = self.PROMOTION_MOVE
+            try: 
+                diag_right_col = self.getColor(fx+1,fy+movedir)
+                if diag_right_col == ocol:
+                    specialMoves[(fx+1,fy+movedir)] = self.PROMOTION_MOVE
+            except: 
+                pass
+            try: 
+                diag_left_col = self.getColor(fx-1,fy+movedir)
+                if diag_left_col == ocol:
+                    specialMoves[(fx-1,fy+movedir)] = self.PROMOTION_MOVE
+            except:
+                pass
 
         moves = self.checkKingGuard(fromPos,moves,specialMoves)
          
@@ -492,26 +498,22 @@ class ChessBoard:
             self._cur_move[3]=True
             self._cur_move[6]=self.EP_CAPTURE_MOVE
                
-        if t == self.PROMOTION_MOVE:
-            pass
-        
-        #need to edit this to give pawn move functionality without weird check in controller
         pv = self._promotion_value
         if self._turn == self.WHITE and toPos[1] == 0:
-            if pv == 0:
-                self._reason = self.MUST_SET_PROMOTION
-                return False
+#            if pv == 0:
+#                self._reason = self.MUST_SET_PROMOTION
+#                return False
             pc = ['Q','R','N','B']
-            p = pc[pv-1]
+            p = pc[0]
             self._cur_move[4]=p
             self._cur_move[6]=self.PROMOTION_MOVE
             #self._promotion_value = 0
         elif self._turn == self.BLACK and toPos[1] == 7:
-            if pv == 0:
-                self._reason = self.MUST_SET_PROMOTION
-                return False
+#            if pv == 0:
+#                self._reason = self.MUST_SET_PROMOTION
+#                return False
             pc = ['q','r','n','b']
-            p = pc[pv-1]
+            p = pc[0]
             self._cur_move[4]=p
             self._cur_move[6]=self.PROMOTION_MOVE
             #self._promotion_value = 0
@@ -1109,6 +1111,8 @@ class ChessBoard:
         p = self._board[y][x].upper()
         if p == 'P':
             m,s = self.getValidPawnMoves(location)
+            for key in s:
+                m.append(key)
             return m
         elif p == 'R':
             return self.getValidRookMoves(location)
@@ -1118,6 +1122,10 @@ class ChessBoard:
             return self.getValidQueenMoves(location)
         elif p == 'K':
             m,s = self.getValidKingMoves(location)
+            for key in s:
+                m.append(key)
+                print "returning king's special move from getvalidmoves function"
+                print str(key) + str(s[key])
             return m
         elif p == 'N':
             return self.getValidKnightMoves(location)
@@ -1374,4 +1382,3 @@ class ChessBoard:
         print "  +-----------------+"
         print "    A B C D E F G H"  
     
-
