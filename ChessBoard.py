@@ -378,11 +378,13 @@ class ChessBoard:
             startrow = 6
             ocol = self.BLACK
             eprow = 3
+            promorow = 1
         else:
             movedir = 1
             startrow = 1
             ocol = self.WHITE
             eprow = 4
+            promorow = 6
         
         if self.isFree(fx,fy+movedir):
             moves.append((fx,fy+movedir))
@@ -395,6 +397,16 @@ class ChessBoard:
             moves.append((fx+1,fy+movedir))
         if fx > 0 and self.getColor(fx-1,fy+movedir) == ocol:
             moves.append((fx-1,fy+movedir))
+            
+        #inclusion of promotion moves and captures as valid move
+        if fy == promorow:
+            if self.isFree(fx,fy+movedir):
+                specialMoves[(fx,fy+movedir)] = self.PROMOTION_MOVE
+            if self.getColor(fx+1,fy+movedir) == ocol:
+                specialMoves[(fx+1,fy+movedir)] = self.PROMOTION_MOVE
+            if self.getColor(fx-1,fy+movedir) == ocol:
+                specialMoves[(fx-1,fy+movedir)] = self.PROMOTION_MOVE
+
             
         if fy == eprow and self._ep[1] != 0:
             if self._ep[0] == fx+1:
@@ -480,6 +492,10 @@ class ChessBoard:
             self._cur_move[3]=True
             self._cur_move[6]=self.EP_CAPTURE_MOVE
                
+        if t == self.PROMOTION_MOVE:
+            pass
+        
+        #need to edit this to give pawn move functionality without weird check in controller
         pv = self._promotion_value
         if self._turn == self.WHITE and toPos[1] == 0:
             if pv == 0:
