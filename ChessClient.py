@@ -1,15 +1,24 @@
 #/usr/bin/env python
 
 from ChessBoard import ChessBoard
-#import AI
 import os, pygame,math
 from pygame.locals import *
-
+from abc import ABCMeta, abstractmethod
 from pprint import pprint
+#from ChessAI import ChessAI
+import random
 
-class Player:
+class Player(object):
+    __metaclass__ = ABCMeta
+    @abstractmethod
+    def get_next_move(self):
+        pass
+    
+class Human(Player):
     def __init__(self,color):
         self.color = color
+    def get_next_move(self):
+        print "You shouldn't be calling this function! I'm not an AI!"
     
 class ChessClient:
 
@@ -24,25 +33,40 @@ class ChessClient:
         controller = Controller(chess)        
         running = True
         
-#        AI_color = ChessBoard.BLACK
-        player_color = ChessBoard.WHITE
-        human_player = Player(player_color)
-#        AI = (AI_color)    
-        player_2_color = ChessBoard.BLACK
-        human_player_2 = Player(player_2_color)
+        player_1 = Human(ChessBoard.WHITE)
+        player_2 = ChessAI(ChessBoard.BLACK,chess,None,None,1)
+##        AI_color = ChessBoard.BLACK
+#        player_color = ChessBoard.WHITE
+#        human_player = Player(player_color)
+##        AI = (AI_color)    
+#        player_2_color = ChessBoard.BLACK
+#        human_player_2 = Player(player_2_color)
         
         while running:
             clock.tick(30)        
     
-            for event in pygame.event.get():
-                if event.type == QUIT:
-                    running = False
-                    pygame.quit()
-                    return
-                elif chess.getTurn() == human_player.color:
-                    controller.handle_event(event)   
-                elif chess.getTurn() == human_player_2.color:
-                    controller.handle_event(event)                             
+            if chess.getTurn() == player_1.color and not chess.isGameOver():
+                if type(player_1) == Human:
+                    for event in pygame.event.get():
+                        if event.type == QUIT:
+                            running = False
+                            pygame.quit()
+                            return
+                        else:
+                            controller.handle_event(event)   
+                else:
+                    player_1.get_next_move()
+            elif chess.getTurn() == player_2.color and not chess.isGameOver():
+                if type(player_2) == Human:
+                    for event in pygame.event.get():
+                        if event.type == QUIT:
+                            running = False
+                            pygame.quit()
+                            return
+                        else:
+                            controller.handle_event(event)   
+                else:
+                    player_2.get_next_move()
                     
             #multithread in python to be able to make calculations and quit during player's turn
             
@@ -51,10 +75,15 @@ class ChessClient:
 #                    board.updatewithMachine'sturn
                     
             if chess.isGameOver():
-                view.end_game_display()
+                view.title_game_display(chess)
                 chess.validMoves = []
-                self.chess.markPos[0] = -1
-                self.chess.markPos[1] = -1
+                chess.markPos[0] = -1
+                chess.markPos[1] = -1
+                for event in pygame.event.get():
+                    if event.type == QUIT:
+                        running = False
+                        pygame.quit()
+                        return
             else:
                 pygame.display.set_caption('ChessBoard Client') 
                                             
@@ -206,6 +235,68 @@ class PyGameWindowView:
             pygame.display.set_caption("Game Over! (Reason:%s)" % self.gameResults[chess.getGameResult()])
         else:
             pygame.display.set_caption('ChessBoard Client') 
+            
+class ChessAI(Player):
+    BOARDWIDTH = 8
+    #write eval_func and should_prune_func and pass it into chessclient when it initalizes AIs
+    def __init__(self,color,chess,eval_func,should_prune_func,ply):
+        """AI gets passed the evaluation function and prune function it will use when searching 
+        the game tree. Prune returns a true or false value telling you if the AI should continue
+        searching the children of a node, while the eval_func returns the score of the board"""
+        self.color = color
+        self.chess = chess
+        self.eval_func = eval_func
+        self.should_prune_func = should_prune_func 
+        self.ply = ply
+        
+    def make_next_move(self):
+        pass        
+    
+    def make_random_next_move(self):
+        valid_moves = self.get_all_valid_moves()
+        rand_move = random.choice(valid_moves)
+        self.chess.addMove(rand_move[0],rand_move[1])
+        
+    def get_next_move(self):
+        """Get the next move from the AI. AI accesses board model to make its decision"""
+        self.make_random_next_move()
+#        if self.color == ChessBoard.WHITE:
+#            player_num = 1
+#        else:
+#            player_num = -1
+#        ply = 3
+#        best_move, best_score = self.negamax(ply,player_num)
+#        return best_move
+        
+    def negamax(self,depth,player_num):
+        """using the pseudocode from wiki: http://en.wikipedia.org/wiki/Negamax"""
+        best_score = None
+        best_move = None
+        if depth == 0 or self.chess.isGameOver() or self.should_prune_func(self.color,self.chess.getBoard()):
+            return (player_num * self.eval_function(),best_move)
+        possible_moves = self.get_all_valid_moves()
+        
+        for m in possible_moves:
+            self.chess.addMove(m)
+            score = -self.negamax(depth-1,-player_num)
+            if score > best_score:
+                best_score = score
+                best_move = m
+            self.chess.undo()
+        return best_score,best_move
+                 
+            
+    def get_all_valid_moves(self):
+        """returns valid moves in the form [((xi,yi),(xf,yf)),...] where xi and yi represent the initial position of 
+        the moved piece and xf and yf represent the final position"""
+        moves = []
+        for i in range(ChessAI.BOARDWIDTH):
+            for j in range(ChessAI.BOARDWIDTH):
+                valid_moves = self.chess.getValidMoves((i,j)) 
+                for m in valid_moves:
+                    moves.append(((i,j),tuple(m)))
+        return moves
+            
             
 def main():
     pygame.init()
