@@ -33,7 +33,7 @@ class ChessClient:
         controller = Controller(chess)        
         running = True
         
-        player_1 = Human(ChessBoard.WHITE)
+        player_1 = ChessAI(ChessBoard.WHITE,chess,None,None,1)
         player_2 = ChessAI(ChessBoard.BLACK,chess,None,None,1)
 ##        AI_color = ChessBoard.BLACK
 #        player_color = ChessBoard.WHITE
