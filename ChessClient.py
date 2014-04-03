@@ -117,6 +117,7 @@ class Controller:
                             self.chess.markPos[1] = self.chess.mousePos[1]
                             #sets the selected piece position equal to the mouse position
                             self.chess.validMoves = self.chess.getValidMoves(tuple(self.chess.markPos))
+#                            print self.chess.validMoves
                             
                         else:
                             if self.chess.markPos[0] != -1:
