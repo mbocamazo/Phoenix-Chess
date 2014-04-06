@@ -1124,8 +1124,8 @@ class ChessBoard:
             m,s = self.getValidKingMoves(location)
             for key in s:
                 m.append(key)
-                print "returning king's special move from getvalidmoves function"
-                print str(key) + str(s[key])
+#                print "returning king's special move from getvalidmoves function"
+#                print str(key) + str(s[key])
             return m
         elif p == 'N':
             return self.getValidKnightMoves(location)
