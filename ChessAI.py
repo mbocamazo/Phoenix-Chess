@@ -64,10 +64,10 @@ class ChessAI(Player):
         """using the pseudocode from wiki: http://en.wikipedia.org/wiki/Negamax"""
         best_score = -1
         if depth == 0 or self.chess.isGameOver() or self.should_prune_func(self.color,self.chess.getBoard()):
-			print (player_num * self.eval_func(self.chess.getBoard()), None)
+            print (player_num * self.eval_func(self.chess.getBoard()), None)
             return player_num * self.eval_func(self.chess.getBoard())
-			
-		possible_moves = self.get_valid_moves()
+            
+        possible_moves = self.get_valid_moves()
         
         for m in possible_moves:
             ret = self.chess.addMove(m[0],m[1])
@@ -86,7 +86,7 @@ class ChessAI(Player):
             self.chess.undo()
 #        print "printing the best move before negamax returns it!"
 #        print best_moves
-		print (best_score,best_moves)
+        print (best_score,best_moves)
         return (best_score,best_moves)
                  
             
