@@ -8,6 +8,7 @@ AI for chess
 from ChessBoardModule import ChessBoard
 import random
 from abc import ABCMeta, abstractmethod
+import numpy as np
 
 class Player(object):
     __metaclass__ = ABCMeta
@@ -44,10 +45,11 @@ class ChessAI(Player):
             player_num = 1
         else:
             player_num = -1
-        best_moves = []
-        best_score, best_moves = self.negamax(self.ply,player_num,best_moves,is_top_layer = True)
-        print best_score
-        best_move = random.choice(best_moves) #choose randomly amongst best_moves. If there's one element, the best move is chosen. If there are multiple elements with the same score, one element is randomly chosen 
+#        best_moves = []
+        best_score, best_move = self.negamax2(self.ply,player_num)
+#        print best_score
+#        print "best move " + str(best_move)
+#        best_move = random.choice(best_moves) #choose randomly amongst best_moves. If there's one element, the best move is chosen. If there are multiple elements with the same score, one element is randomly chosen 
         player_before_add_move = self.chess.getTurn()   
         ret = self.chess.addMove(best_move[0],best_move[1])
         if ret != True:
@@ -60,9 +62,36 @@ class ChessAI(Player):
             print "black makes the move " + str((best_move[0],best_move[1]))
             
             
+    def negamax2(self,depth,player_num):
+        """second try of negamax function.  Depth is a positive integer."""
+        best_score = -np.inf
+#        print "depth: "+ str(depth)
+        if depth == 0 or self.chess.isGameOver() or self.should_prune_func(self.color,self.chess.getBoard()):
+#            print "terminal node move"
+            board_weight = player_num * self.eval_func(self.chess.getBoard())
+#            return board_weight
+            return board_weight
+#            return board_weight+5*random.random()-0.5 #temporary symmetry breaking
+        valid_moves = self.get_valid_moves()
+        for candidate in valid_moves:
+            move_is_legal = self.chess.addMove(candidate[0],candidate[1])
+            if not(move_is_legal):
+                print "Illegal Move Attempted"
+#            print candidate
+#            print player_num
+            score = -1*self.negamax2(depth-1,-player_num)
+            if score > best_score:
+                best_score = score
+                best_move = candidate
+            self.chess.undo()
+#        print "finalized"
+        return (best_score,best_move)
+                
+            
+            
     def negamax(self,depth,player_num,best_moves,is_top_layer):
         """using the pseudocode from wiki: http://en.wikipedia.org/wiki/Negamax"""
-        best_score = -1
+        best_score = -np.inf
         if depth == 0 or self.chess.isGameOver() or self.should_prune_func(self.color,self.chess.getBoard()):
             print (player_num * self.eval_func(self.chess.getBoard()), None)
             return player_num * self.eval_func(self.chess.getBoard())

@@ -21,4 +21,5 @@ def simple_piece_eval(board):
     score = 0
     for piece in piece_dict:
         score += score_dict[piece]*piece_dict[piece]
+#    print "eval func returning score: " + str(score)
     return score
