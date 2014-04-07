@@ -45,38 +45,49 @@ class ChessAI(Player):
         else:
             player_num = -1
         best_moves = []
-        best_score, best_moves = self.negamax(self.ply,player_num,best_moves)
-#        print "printing the final best moves"        
-#        print best_moves
-        best_move = random.choice(best_moves) #choose randomly amongst best_moves. If there's one element, the best move is chosen. If there are elements with the same score, one element is randomly chosen 
-        self.chess.addMove(best_move[0],best_move[1])
+        best_score, best_moves = self.negamax(self.ply,player_num,best_moves,is_top_layer = True)
+        print best_score
+        best_move = random.choice(best_moves) #choose randomly amongst best_moves. If there's one element, the best move is chosen. If there are multiple elements with the same score, one element is randomly chosen 
+        player_before_add_move = self.chess.getTurn()   
+        ret = self.chess.addMove(best_move[0],best_move[1])
+        if ret != True:
+                print str(player_before_add_move)+" tried to make the illegal move" +str(best_move)
+                print "Reason: "
+                print self.chess.getReason()
         if self.color == ChessBoard.WHITE:
-            assert self.chess.getTurn() == ChessBoard.BLACK
+            print "white makes the move " + str((best_move[0],best_move[1]))        
         if self.color == ChessBoard.BLACK:
-            assert self.chess.getTurn() == ChessBoard.WHITE
+            print "black makes the move " + str((best_move[0],best_move[1]))
             
-    def negamax(self,depth,player_num,best_moves):
+            
+    def negamax(self,depth,player_num,best_moves,is_top_layer):
         """using the pseudocode from wiki: http://en.wikipedia.org/wiki/Negamax"""
         best_score = -1
         if depth == 0 or self.chess.isGameOver() or self.should_prune_func(self.color,self.chess.getBoard()):
+			print (player_num * self.eval_func(self.chess.getBoard()), None)
             return player_num * self.eval_func(self.chess.getBoard())
-        possible_moves = self.get_valid_moves()
+			
+		possible_moves = self.get_valid_moves()
         
         for m in possible_moves:
             ret = self.chess.addMove(m[0],m[1])
-            assert ret == True
-            score = -1*self.negamax(depth-1,-player_num,best_moves)
+            if ret != True:
+                print "tried to make the illegal move in negamax" +str(m)
+                print "Reason: "
+                print self.chess.getReason()
+            score,move = -1*self.negamax(depth-1,-player_num,best_moves, is_top_layer = False)
             if score > best_score:
                 best_score = score
                 best_moves = [m]
-#                print "printing the new best move"
-#                print best_moves
-            elif score == best_score:
+                if is_top_layer:
+					print str(best_score)
+            elif score == best_score and is_top_layer: #only add tied scores on the first layer. otherwise you end up adding future moves and opponent moves.
                 best_moves.append(m)
             self.chess.undo()
 #        print "printing the best move before negamax returns it!"
 #        print best_moves
-        return best_score,best_moves
+		print (best_score,best_moves)
+        return (best_score,best_moves)
                  
             
     def get_valid_moves(self):

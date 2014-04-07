@@ -43,7 +43,7 @@ class ChessClient:
                         else:
                             controller.handle_event(event)   
                 else:
-                    print "AI 1 making turn"
+                    print "AI 1 (WHITE) making turn"
                     player_1.make_next_move()
             elif chess.getTurn() == player_2.color and not chess.isGameOver():
                 if type(player_2) == Human:
@@ -55,7 +55,7 @@ class ChessClient:
                         else:
                             controller.handle_event(event)   
                 else:
-                    print "AI 2 making turn"
+                    print "AI 2 (BLACK) making turn"
                     player_2.make_next_move()
                     
             #multithread in python to be able to make calculations and quit during player's turn
@@ -620,6 +620,7 @@ class ChessBoard:
             if self.isFree(fx,fy+movedir) and self.isFree(fx,fy+(movedir*2)):
                 moves.append((fx,fy+(movedir*2)))
                 specialMoves[(fx,fy+(movedir*2))] = self.EP_MOVE
+                
         if fx < 7 and self.getColor(fx+1,fy+movedir) == ocol:
             moves.append((fx+1,fy+movedir))
         if fx > 0 and self.getColor(fx-1,fy+movedir) == ocol:
@@ -712,7 +713,8 @@ class ChessBoard:
     def movePawn(self,fromPos,toPos):
         moves,specialMoves = self.getValidPawnMoves(fromPos)
         
-        if not toPos in moves:
+        if not toPos in moves and not toPos in specialMoves:
+            print "pawn tried to make an invalid move!"
             return False
         
         if specialMoves.has_key(toPos):
@@ -767,6 +769,7 @@ class ChessBoard:
         moves = self.getValidKnightMoves(fromPos)
         
         if not toPos in moves:
+            print "knight tried to make an invalid move!"
             return False
         
         self.clearEP()
@@ -799,7 +802,8 @@ class ChessBoard:
         else:
             t = 0
         
-        if not toPos in moves:
+        if not toPos in moves and not toPos in specialMoves:
+            print "king tried to make an invalid move!"
             return False
         
         self.clearEP()
@@ -844,6 +848,7 @@ class ChessBoard:
         moves = self.getValidQueenMoves(fromPos)
         
         if not toPos in moves:
+            print "queen tried to make an invalid move!"
             return False
         
         self.clearEP()
@@ -862,6 +867,7 @@ class ChessBoard:
         moves = self.getValidBishopMoves(fromPos)
         
         if not toPos in moves:
+            print "bishop tried to make an invalid move!"
             return False
         
         self.clearEP()
@@ -881,6 +887,7 @@ class ChessBoard:
         moves = self.getValidRookMoves(fromPos)
         
         if not toPos in moves:
+            print "rook tried to make an invalid move!"
             return False
                 
         fx,fy = fromPos
@@ -1368,6 +1375,7 @@ class ChessBoard:
         
         If this method returns False you can use the getReason method to determin why.
         """        
+        
         self._reason = 0
         #                piece,from,to,take,promotion,check,specialmove
         self._cur_move = [None,None,None,False,None,None,self.NORMAL_MOVE]
@@ -1438,11 +1446,11 @@ class ChessBoard:
                 self._reason = self.INVALID_MOVE
                 return False
         else:
-            return False        
+            return False   
         
         if self._turn == self.WHITE:
             self._turn = self.BLACK
-        else:
+        elif self._turn == self.BLACK:
             self._turn = self.WHITE
         
         if self.isCheck():
