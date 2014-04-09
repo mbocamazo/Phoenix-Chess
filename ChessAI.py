@@ -45,9 +45,9 @@ class ChessAI(Player):
             player_num = 1
         else:
             player_num = -1
-#        best_moves = []
+##        best_moves = []
 #        best_score,best_move = self.negamax(self.ply,player_num,is_top_layer = True)
-        best_score,best_move = self.alpha_beta_pruned_negamax(self.ply,-np.inf,np.inf,player_num,is_top_layer = True)
+        best_score,best_move = self.negamax_ab_2(self.ply,player_num,-np.inf,np.inf,is_top_layer=True)
         print "returning best score and best move"
         print best_score
         print best_move
@@ -106,8 +106,10 @@ class ChessAI(Player):
             if not(move_is_legal):
                 print "Illegal Move Attempted"
             score = -1*self.alpha_beta_pruned_negamax(depth-1,-b,-a,-player_num)
+            print self.chess.getLastTextMove()
             self.chess.undo()
-            #score += (random.random()-.5)/10.0 #stops moves from being tied by adding small random amounts
+#            if is_top_layer:
+#                score += (random.random()-.5)/10.0 #stops moves from being tied by adding small random amounts
             if score > best_score:
                 best_score = score
                 best_move = candidate
@@ -121,6 +123,29 @@ class ChessAI(Player):
             return best_score,best_move
         else:
             return best_score
+            
+    def negamax_ab_2(self,depth,player_num,alpha,beta,is_top_layer=False):
+        """negamax function.  Depth is a positive integer."""
+        self.chess.nodesSearched += 1
+        if depth == 0 or self.chess.isGameOver() or self.should_prune_func(self.chess): #and not continue q search (chess)
+            board_weight = player_num * self.eval_func(self.chess)
+            return board_weight
+        valid_moves = self.get_valid_moves()
+        for candidate in valid_moves:
+            self.chess.addMove(candidate[0],candidate[1])
+            score = -1*self.negamax_ab_2(depth-1,-player_num,-beta,-alpha)
+            self.chess.undo()
+            if score > alpha:
+                alpha = score
+                best_move = candidate
+            if alpha >= beta:
+                break
+        if is_top_layer:
+            print "nodes evaluated: "+str(self.chess.nodesSearched)
+            self.chess.nodesSearched = 0
+            return alpha,best_move
+        else:
+            return alpha
                        
     def get_valid_moves(self):
         """returns valid moves in the form [((xi,yi),(xf,yf)),...] where xi and yi represent the initial position of 
