@@ -95,6 +95,7 @@ class ChessBoard:
         self.mousePos = [-1,-1]
         self.markPos = [-1,-1]
         self.validMoves = []
+        self.nodesSearched = 0
 
     def state2str(self):
 

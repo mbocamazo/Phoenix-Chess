@@ -26,7 +26,7 @@ def simple_piece_eval(chess):
 #    print "eval func returning score: " + str(score)
     if chess.isGameOver():
         if chess.getGameResult() == 1:
-            score = np.inf
+            score = 100000
         elif chess.getGameResult() == 2:
-            score = -np.inf
+            score = -100000
     return score
