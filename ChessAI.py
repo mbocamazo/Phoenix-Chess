@@ -68,7 +68,7 @@ class ChessAI(Player):
         """negamax function.  Depth is a positive integer."""
         best_score = -np.inf
         if depth == 0 or self.chess.isGameOver() or self.should_prune_func(self.color,self.chess.getBoard()):
-            board_weight = player_num * self.eval_func(self.chess.getBoard())
+            board_weight = player_num * self.eval_func(self.chess)
             return board_weight
 #            return board_weight+5*random.random()-0.5 #temporary symmetry breaking
         valid_moves = self.get_valid_moves()
@@ -77,6 +77,7 @@ class ChessAI(Player):
             if not(move_is_legal):
                 print "Illegal Move Attempted"
             score = -1*self.negamax(depth-1,-player_num)
+            score += (random.random()-.5)/10.0 #stops moves from being tied by adding small random amounts
             if score > best_score:
                 best_score = score
                 best_move = candidate
