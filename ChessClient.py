@@ -25,9 +25,9 @@ class ChessClient:
         player_1 = Human(ChessBoard.WHITE)
 #        player_2 = Human(ChessBoard.BLACK)
 #        AI1ply = 2
-#        player_1 = ChessAI(ChessBoard.WHITE,chess,evaluation_functions.simple_piece_eval,prune_functions.never_prune,AI1ply)
-        AI2ply = 4
-        player_2 = ChessAI(ChessBoard.BLACK,chess,evaluation_functions.simple_piece_eval,prune_functions.never_prune,AI2ply)
+#        player_1 = ChessAI(ChessBoard.WHITE,chess,evaluation_functions.terminal_eval,prune_functions.never_prune,AI1ply)
+        AI2ply = 2
+        player_2 = ChessAI(ChessBoard.BLACK,chess,evaluation_functions.terminal_eval,prune_functions.never_prune,AI2ply)
 ##        AI_color = ChessBoard.BLACK
 #        player_color = ChessBoard.WHITE
 #        human_player = Player(player_color)
@@ -50,6 +50,7 @@ class ChessClient:
                 else:
                     print "AI 1 (WHITE) making turn"
                     player_1.make_next_move()
+                    chess.moveNumber += 1
             elif chess.getTurn() == player_2.color and not chess.isGameOver():
                 if type(player_2) == Human:
                     for event in pygame.event.get():
@@ -62,6 +63,7 @@ class ChessClient:
                 else:
                     print "AI 2 (BLACK) making turn"
                     player_2.make_next_move()
+                    chess.moveNumber += 1
                     
             #multithread in python to be able to make calculations and quit during player's turn
             

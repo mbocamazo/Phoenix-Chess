@@ -22,6 +22,11 @@ class ChessBoard:
     BLACK = 1
     NOCOLOR = -1
     
+    #for scoring purposes
+    SWHITE = 1
+    SBLACK = -1
+    SNOCOLOR = 0
+    
     # Promotion values
     QUEEN = 1
     ROOK = 2
@@ -96,6 +101,7 @@ class ChessBoard:
         self.markPos = [-1,-1]
         self.validMoves = []
         self.nodesSearched = 0
+        self.moveNumber = 0
 
     def state2str(self):
 
@@ -242,6 +248,15 @@ class ChessBoard:
        
     def isFree(self,x,y):
         return self._board[y][x] == '.' 
+        
+    def getColorS(self,x,y):
+        """get color for scoring"""
+        if self._board[y][x] == '.':
+            return self.SNOCOLOR
+        elif self._board[y][x].isupper():
+            return self.SWHITE
+        elif self._board[y][x].islower():
+            return self.SBLACK
 
     def getColor(self,x,y):
         if self._board[y][x] == '.':

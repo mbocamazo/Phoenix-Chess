@@ -100,7 +100,7 @@ class ChessAI(Player):
             board_weight = player_num * self.eval_func(self.chess)
             return board_weight
         best_score = -np.inf
-        valid_moves = self.get_valid_moves()
+        valid_moves = self.get_valid_moves()        
         for candidate in valid_moves:
             move_is_legal = self.chess.addMove(candidate[0],candidate[1])
             if not(move_is_legal):
@@ -128,12 +128,47 @@ class ChessAI(Player):
         """negamax function.  Depth is a positive integer."""
         self.chess.nodesSearched += 1
         if depth == 0 or self.chess.isGameOver() or self.should_prune_func(self.chess): #and not continue q search (chess)
-            board_weight = player_num * self.eval_func(self.chess)
+            score = self.eval_func(self.chess)
+            if score == None: print "eval func None Type found"; score = 0 
+            board_weight = player_num * score
             return board_weight
         valid_moves = self.get_valid_moves()
         for candidate in valid_moves:
             self.chess.addMove(candidate[0],candidate[1])
             score = -1*self.negamax_ab_2(depth-1,-player_num,-beta,-alpha)
+            self.chess.undo()
+            if score > alpha:
+                alpha = score
+                best_move = candidate
+            if alpha >= beta:
+                break
+        if is_top_layer:
+            print "nodes evaluated: "+str(self.chess.nodesSearched)
+            self.chess.nodesSearched = 0
+            return alpha,best_move
+        else:
+            return alpha
+            
+    def negamax_ab_move_order(self,depth,player_num,alpha,beta,is_top_layer=False):
+        """negamax function.  Depth is a positive integer."""
+        self.chess.nodesSearched += 1
+        if depth == 0 or self.chess.isGameOver() or self.should_prune_func(self.chess): #and not continue q search (chess)
+            board_weight = player_num * self.eval_func(self.chess)
+            return board_weight
+        valid_moves = self.get_valid_moves()
+        scored_valid_moves = self.score_move_order(valid_moves)
+        capture_moves_left_in_dict = True
+        while len(scored_valid_moves) > 0:
+            if capture_moves_left_in_dict:
+                candidate, move_order_score = self.return_and_del_largest_element(scored_valid_moves)
+                if move_order_score < -100: #no more capture moves are left. 
+                    capture_moves_left_in_dict = False
+            else:
+                #stop looking for max values in the dictionary. just grab any move and remove it from the dict.
+                candidate = scored_valid_moves.keys()[0]
+                scored_valid_moves.pop(candidate)
+            self.chess.addMove(candidate[0],candidate[1])
+            score = -1*self.negamax_ab_move_order(depth-1,-player_num,-beta,-alpha)
             self.chess.undo()
             if score > alpha:
                 alpha = score
@@ -158,6 +193,42 @@ class ChessAI(Player):
                     moves.append(((i,j),tuple(m)))
         return moves
             
+    def score_move_order(self,valid_moves):
+        """returns a list of dictionaries, where the keys are moves of format ((i,j),(k,l)) and values are the negative of the material score 
+        of the piece doing the capture in that move (ex: score of a pawn capturing something is -1, score of queen capturing is -9,
+        score of no capture move is -1000 (arbitrarily largely negative, but we avoided numpy.inf because it is compared to numpy.inf later).
+        Example output: {((i,j),(k,l)):-1,((i,j),(k,l)):-1000,((i,j),(k,l)):-3}. this score move order heuristic assumes that capturing
+        with a low value piece is more likely to indicate a high alpha for the player and to trigger alpha cutoffs early."""
+        score_dict = {'P':-1,'R':-5,'N':-3,'B':-3.25,'Q':-9,'K':-100}    
         
+        score_list = [None]*len(valid_moves)
+        for i, m in enumerate(valid_moves):
+            move_from = m[0]
+            move_dest = m[1]
+            #line below checks to see if a piece is being captured by the valid move.
+            if self.chess.getColor(move_dest[0],move_dest[1]) != ChessBoard.NOCOLOR and self.chess.getColor(move_dest[0],move_dest[1]) != self.color:
+                piece = self.chess._board[move_from[1]][move_from[0]].upper() 
+                score = score_dict[piece]
+            else:
+                score = -1000
+            score_list[i] = score
+        moves_and_scores = dict(zip(valid_moves,score_list))
+        return moves_and_scores
+        
+    def return_and_del_largest_element(self,scored_valid_moves):
+        """returns highest scored move in the dictionary and removes it. gets a dictionary of moves and scores, returns just a move.
+        example input: {((i,j),(k,l)):-1,((a,b),(c,d)):-1000,((e,f),(g,h)):-3} output: ((i,j),(k,l)). It's fine to store this info
+        in a dictionary because we're not interested in sorting the whole dictionary at once anyway. just find the max as needed."""
+        max_score = -np.inf
+        highest_scored_move = None
+        for move in scored_valid_moves:
+            score = scored_valid_moves[move]
+            if score > max_score:
+                max_score = score
+                highest_scored_move = move
+        scored_valid_moves.pop(highest_scored_move)
+        return highest_scored_move, max_score
+        
+            
     
         
