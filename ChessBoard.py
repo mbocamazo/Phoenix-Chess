@@ -842,6 +842,19 @@ class ChessBoard:
                 hint_f = files[fx]
             res = "%s%s%s%s%s%s%s%s" % (piece,hint_f,hint_r,tc,files[tpos[0]],ranks[tpos[1]],pt,check)
         return res
+        
+    def _formatAIMove(self,move):
+        #piece,from,to,take,promotion,check        
+        piece = self._board[move[1][1]][move[1][0]]
+        fpos = tuple(move[0])
+        tpos = tuple(move[1])
+        
+        files = "abcdefgh"
+        ranks = "87654321"
+        piece = piece.upper()
+        if piece == "P":
+            piece = ""
+        return "%s%s%s-%s%s" % (piece,files[fpos[0]],ranks[fpos[1]],files[tpos[0]],ranks[tpos[1]])
 
     #----------------------------------------------------------------------------
     # PUBLIC METHODS
@@ -1152,7 +1165,36 @@ class ChessBoard:
             return self.getValidKnightMoves(location)
         else:
             return []
-        
+            
+    def getValidMovesS(self,location):
+        """
+        Returns the number of valid moves with symmetry slightly faster for activity scoring.
+        Doesn't add pawn or king activity.
+        """
+        if self._game_result: #if game over, return none
+            return 0
+            
+        x,y = location
+                
+        self.updateKingLocations()
+
+        p = self._board[y][x].upper()
+        if p == '.':
+            return 0
+        elif p == 'P':
+            return 0
+        elif p == 'R':
+            return len(self.getValidRookMoves(location))*self.getColorS(x,y)
+        elif p == 'B':
+            return len(self.getValidBishopMoves(location))*1.1*self.getColorS(x,y)
+        elif p == 'Q':
+            return len(self.getValidQueenMoves(location))/2.0*self.getColorS(x,y)
+        elif p == 'K':
+            return 0
+        elif p == 'N':
+            return len(self.getValidKnightMoves(location))*1.4*self.getColorS(x,y)
+        else:
+            return 0        
 
     def addMove(self,fromPos,toPos):
         """

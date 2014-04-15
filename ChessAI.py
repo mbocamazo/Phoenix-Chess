@@ -9,6 +9,7 @@ from ChessBoard import ChessBoard
 import random
 from abc import ABCMeta, abstractmethod
 import numpy as np
+import time
 
 class Player(object):
     __metaclass__ = ABCMeta
@@ -47,10 +48,13 @@ class ChessAI(Player):
             player_num = -1
 ##        best_moves = []
 #        best_score,best_move = self.negamax(self.ply,player_num,is_top_layer = True)
-        best_score,best_move = self.negamax_ab_2(self.ply,player_num,-np.inf,np.inf,is_top_layer=True)
-        print "returning best score and best move"
-        print best_score
-        print best_move
+        start_time = time.time()
+        best_score,best_move = self.negamax_ab_move_order(self.ply,player_num,-np.inf,np.inf,is_top_layer=True)
+        current_time = time.time()
+        print "thinking time:   %.10f" % (current_time - start_time)
+        print "nodes/second:    " + str(self.chess.nodesSearched/(current_time-start_time))
+        print "score of best move: " + str(best_score)
+        self.chess.nodesSearched = 0
 #        print "best move " + str(best_move)
 #        best_move = random.choice(best_moves) #choose randomly amongst best_moves. If there's one element, the best move is chosen. If there are multiple elements with the same score, one element is randomly chosen 
         player_before_add_move = self.chess.getTurn()   
@@ -60,9 +64,9 @@ class ChessAI(Player):
                 print "Reason: "
                 print self.chess.getReason()
         if self.color == ChessBoard.WHITE:
-            print "white makes the move " + str((best_move[0],best_move[1]))        
+            print "white makes the move " + self.chess._formatAIMove(best_move)       
         if self.color == ChessBoard.BLACK:
-            print "black makes the move " + str((best_move[0],best_move[1]))
+            print "black makes the move " + self.chess._formatAIMove(best_move)
             
             
     def negamax(self,depth,player_num,is_top_layer=False):
@@ -86,7 +90,7 @@ class ChessAI(Player):
             self.chess.undo()
         if is_top_layer:
             print "nodes evaluated: "+str(self.chess.nodesSearched)
-            self.chess.nodesSearched = 0
+#            self.chess.nodesSearched = 0
             return best_score,best_move
         else:
             return best_score
@@ -119,7 +123,7 @@ class ChessAI(Player):
                 break
         if is_top_layer:
             print "nodes evaluated: "+str(self.chess.nodesSearched)
-            self.chess.nodesSearched = 0
+#            self.chess.nodesSearched = 0
             return best_score,best_move
         else:
             return best_score
@@ -129,7 +133,7 @@ class ChessAI(Player):
         self.chess.nodesSearched += 1
         if depth == 0 or self.chess.isGameOver() or self.should_prune_func(self.chess): #and not continue q search (chess)
             score = self.eval_func(self.chess)
-            if score == None: print "eval func None Type found"; score = 0 
+            if score == None: print "eval func None Type found"; score = 0  
             board_weight = player_num * score
             return board_weight
         valid_moves = self.get_valid_moves()
@@ -144,7 +148,7 @@ class ChessAI(Player):
                 break
         if is_top_layer:
             print "nodes evaluated: "+str(self.chess.nodesSearched)
-            self.chess.nodesSearched = 0
+#            self.chess.nodesSearched = 0
             return alpha,best_move
         else:
             return alpha
@@ -177,7 +181,7 @@ class ChessAI(Player):
                 break
         if is_top_layer:
             print "nodes evaluated: "+str(self.chess.nodesSearched)
-            self.chess.nodesSearched = 0
+#            self.chess.nodesSearched = 0
             return alpha,best_move
         else:
             return alpha
@@ -211,6 +215,8 @@ class ChessAI(Player):
                 score = score_dict[piece]
             else:
                 score = -1000
+            if self.chess.isCheck():
+                score = 0
             score_list[i] = score
         moves_and_scores = dict(zip(valid_moves,score_list))
         return moves_and_scores
