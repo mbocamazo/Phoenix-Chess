@@ -160,7 +160,8 @@ class ChessBoard:
             self._black_king_castle,
             self._black_queen_castle,
             deepcopy(self._board),
-            deepcopy(self._ep)]                 
+            #changed from deepcopy to list copy            
+            list(self._ep)]                 
         self._three_rep_stack.append(three_state)
               
         state_str = self.state2str()
@@ -169,7 +170,8 @@ class ChessBoard:
         self._state_stack_pointer = len(self._state_stack)            
 
     def pushMove(self):
-        self._moves.append(deepcopy(self._cur_move))
+        #changed from deep copy to normal copy for this list.
+        self._moves.append(list(self._cur_move))
                
     def threeRepetitions(self):
             
@@ -942,7 +944,8 @@ class ChessBoard:
             self._black_king_castle,
             self._black_queen_castle,
             deepcopy(self._board),
-            deepcopy(self._ep)]                 
+            #changed ep from deepcopy to list copy            
+            list(self._ep)]                 
 
         self._three_rep_stack.append(three_state)              
 
