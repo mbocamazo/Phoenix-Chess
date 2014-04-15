@@ -18,7 +18,7 @@ def terminal_eval(chess):
         return score
     else:
         score = 0
-        board = chess.getBoard()
+        board = chess.getShallowBoard()
         piece_dict = {}
         for row in board:
             for piece in row:
@@ -42,7 +42,7 @@ def terminal_eval2(chess):
         return score
     else:
         score = 0
-        board = chess.getBoard()
+        board = chess.getShallowBoard()
         piece_dict = {}
         for row in board:
             for piece in row:

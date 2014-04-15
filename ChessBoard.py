@@ -272,25 +272,6 @@ class ChessBoard:
 
         if player == None:
             player = self._turn
-
-        if player == self.WHITE:
-            if lx<7 and ly>0 and self._board[ly-1][lx+1] == 'p':
-                return True
-            elif lx>0 and ly>0 and self._board[ly-1][lx-1] == 'p':
-                return True
-        else:  
-            if lx<7 and ly<7 and self._board[ly+1][lx+1] == 'P':
-                return True
-            elif lx>0 and ly<7 and self._board[ly+1][lx-1] == 'P':
-                return True
-                
-        m =[(lx+1,ly+2),(lx+2,ly+1),(lx+2,ly-1),(lx+1,ly-2),(lx-1,ly+2),(lx-2,ly+1),(lx-1,ly-2),(lx-2,ly-1)]
-        for p in m:
-            if p[0] >= 0 and p[0] <= 7 and p[1] >= 0 and p[1] <= 7: 
-                if self._board[p[1]][p[0]] == "n" and player==self.WHITE:
-                    return True                
-                elif self._board[p[1]][p[0]] == "N" and player==self.BLACK:
-                    return True                
                 
         dirs = [(1,0),(-1,0),(0,1),(0,-1),(1,1),(-1,1),(1,-1),(-1,-1)]        
         for d in dirs:
@@ -319,6 +300,27 @@ class ChessBoard:
                     elif p == 'B' and abs(dx) == abs(dy):
                         return True 
                     break
+        
+        m =[(lx+1,ly+2),(lx+2,ly+1),(lx+2,ly-1),(lx+1,ly-2),(lx-1,ly+2),(lx-2,ly+1),(lx-1,ly-2),(lx-2,ly-1)]
+        for p in m:
+            if p[0] >= 0 and p[0] <= 7 and p[1] >= 0 and p[1] <= 7: 
+                if self._board[p[1]][p[0]] == "n" and player==self.WHITE:
+                    return True                
+                elif self._board[p[1]][p[0]] == "N" and player==self.BLACK:
+                    return True   
+        
+        if player == self.WHITE:
+            if lx<7 and ly>0 and self._board[ly-1][lx+1] == 'p':
+                return True
+            elif lx>0 and ly>0 and self._board[ly-1][lx-1] == 'p':
+                return True
+        else:  
+            if lx<7 and ly<7 and self._board[ly+1][lx+1] == 'P':
+                return True
+            elif lx>0 and ly<7 and self._board[ly+1][lx-1] == 'P':
+                return True
+                
+                
         return False
 
 
@@ -1114,6 +1116,10 @@ class ChessBoard:
         Empty squares are markt with a period (.)
         """
         return deepcopy(self._board)        
+        
+    def getShallowBoard(self):
+        """Returns the board itself for evaluation purposes, avoids deepcopy"""
+        return self._board
 
     def getTurn(self):
         """
