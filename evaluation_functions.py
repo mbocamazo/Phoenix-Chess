@@ -27,6 +27,30 @@ def terminal_eval(chess):
                 else:
                     piece_dict[piece] = 1
         score += simple_material_eval(chess,piece_dict)
+#        score += simple_pos_eval(chess,board,piece_dict)
+        return score
+        
+def terminal_eval2(chess):
+    """returns sum of individual evaluation functions"""
+    if chess.isGameOver():
+        if chess.getGameResult() == 1:
+            score = 100000
+        elif chess.getGameResult() == 2:
+            score = -100000
+        else:
+            score = 0
+        return score
+    else:
+        score = 0
+        board = chess.getBoard()
+        piece_dict = {}
+        for row in board:
+            for piece in row:
+                if piece in piece_dict:
+                    piece_dict[piece] += 1
+                else:
+                    piece_dict[piece] = 1
+        score += simple_material_eval(chess,piece_dict)
         score += simple_pos_eval(chess,board,piece_dict)
         return score
     

@@ -26,8 +26,8 @@ class ChessClient:
 #        player_2 = Human(ChessBoard.BLACK)
         AI1ply = 2
         player_1 = ChessAI(ChessBoard.WHITE,chess,evaluation_functions.terminal_eval,prune_functions.never_prune,AI1ply)
-        AI2ply = 4
-        player_2 = ChessAI(ChessBoard.BLACK,chess,evaluation_functions.terminal_eval,prune_functions.never_prune,AI2ply)
+        AI2ply = 2
+        player_2 = ChessAI(ChessBoard.BLACK,chess,evaluation_functions.terminal_eval2,prune_functions.never_prune,AI2ply)
 ##        AI_color = ChessBoard.BLACK
 #        player_color = ChessBoard.WHITE
 #        human_player = Player(player_color)
@@ -240,6 +240,7 @@ def main():
     g.mainLooptemp()
     
 #this calls the 'main' function when this script is executed
-if __name__ == '__main__': main()
+if __name__ == '__main__': 
+    cProfile.run('main()')
 
 

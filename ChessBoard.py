@@ -1139,7 +1139,7 @@ class ChessBoard:
         if x < 0 or x > 7 or y < 0 or y > 7:
             return False
                 
-        self.updateKingLocations()
+#        self.updateKingLocations()
     
         if self.getColor(x,y) != self._turn:
             return []
@@ -1176,7 +1176,7 @@ class ChessBoard:
             
         x,y = location
                 
-        self.updateKingLocations()
+#        self.updateKingLocations()
 
         p = self._board[y][x].upper()
         if p == '.':
@@ -1247,6 +1247,89 @@ class ChessBoard:
             return False
      
         # Call the correct handler
+        p = self._board[fy][fx].upper()
+        self._cur_move[0]=p        
+        if p == 'P':
+            if not self.movePawn((fx,fy),(tx,ty)):
+                if not self._reason:
+                    self._reason = self.INVALID_MOVE
+                return False
+        elif p == 'R':
+            if not self.moveRook((fx,fy),(tx,ty)):
+                self._reason = self.INVALID_MOVE
+                return False
+        elif p == 'B':
+            if not self.moveBishop((fx,fy),(tx,ty)):
+                self._reason = self.INVALID_MOVE
+                return False
+        elif p == 'Q':
+            if not self.moveQueen((fx,fy),(tx,ty)):
+                self._reason = self.INVALID_MOVE
+                return False
+        elif p == 'K':
+            if not self.moveKing((fx,fy),(tx,ty)):
+                self._reason = self.INVALID_MOVE
+                return False
+        elif p == 'N':
+            if not self.moveKnight((fx,fy),(tx,ty)):
+                self._reason = self.INVALID_MOVE
+                return False
+        else:
+            return False   
+        
+        if self._turn == self.WHITE:
+            self._turn = self.BLACK
+        elif self._turn == self.BLACK:
+            self._turn = self.WHITE
+        
+        if self.isCheck():
+            self._cur_move[5]="+"
+                    
+        if not self.hasAnyValidMoves():
+            if self.isCheck():
+                self._cur_move[5]="#"
+                if self._turn == self.WHITE:
+                    self.endGame(self.BLACK_WIN)
+                else:            
+                    self.endGame(self.WHITE_WIN)
+            else:  
+                self.endGame(self.STALEMATE)     
+        else:
+            if self._fifty == 100:
+                self.endGame(self.FIFTY_MOVES_RULE)
+            elif self.threeRepetitions():
+                self.endGame(self.THREE_REPETITION_RULE)
+        
+        self.pushState()
+        self.pushMove()
+         
+        return True 
+        
+    def addMoveS(self,fromPos,toPos):
+        """
+        Tries to move the piece located om fromPos to toPos. Returns True if that was a valid move.
+        The position arguments must be tuples containing x,y value Ex. (4,6).
+        This method also detects game over.
+        
+        If this method returns False you can use the getReason method to determin why.
+        """        
+        
+        self._reason = 0
+        #                piece,from,to,take,promotion,check,specialmove
+        self._cur_move = [None,None,None,False,None,None,self.NORMAL_MOVE]
+        
+        if self._game_result:
+            self._result = self.GAME_IS_OVER
+            return False
+
+        self.updateKingLocations()
+
+        fx,fy = fromPos
+        tx,ty = toPos
+
+        self._cur_move[1]=fromPos        
+        self._cur_move[2]=toPos        
+
         p = self._board[fy][fx].upper()
         self._cur_move[0]=p        
         if p == 'P':

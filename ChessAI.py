@@ -10,6 +10,7 @@ import random
 from abc import ABCMeta, abstractmethod
 import numpy as np
 import time
+import cProfile
 
 class Player(object):
     __metaclass__ = ABCMeta
