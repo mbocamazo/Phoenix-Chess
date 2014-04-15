@@ -1111,6 +1111,10 @@ class ChessBoard:
         Empty squares are markt with a period (.)
         """
         return deepcopy(self._board)        
+        
+    def getShallowBoard(self):
+        """Returns the board itself for evaluation purposes, avoids deepcopy"""
+        return self._board
 
     def getTurn(self):
         """
