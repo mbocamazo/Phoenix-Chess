@@ -27,7 +27,7 @@ def terminal_eval(chess):
                 else:
                     piece_dict[piece] = 1
         score += simple_material_eval(chess,piece_dict)
-#        score += simple_pos_eval(chess,board,piece_dict)
+        score += simple_pos_eval(chess,board,piece_dict)
         return score
         
 def terminal_eval2(chess):
@@ -51,7 +51,7 @@ def terminal_eval2(chess):
                 else:
                     piece_dict[piece] = 1
         score += simple_material_eval(chess,piece_dict)
-        score += simple_pos_eval(chess,board,piece_dict)
+        score += simple_pos_eval2(chess,board,piece_dict)
         return score
     
 def simple_material_eval(chess,piece_dict):
@@ -69,7 +69,16 @@ def simple_pos_eval(chess,board,piece_dict):
     """Analyzes positional control and returns numerical score"""
     p_score = 0
     p_score += simple_activity_eval(chess,board,piece_dict)
+    p_score += pawn_promo_eval(chess,board,piece_dict) #either, but not both (double counting)
 #    p_score += pawn_structure_eval(chess,board,piece_dict)
+    return p_score
+    
+def simple_pos_eval2(chess,board,piece_dict):
+    """Analyzes positional control and returns numerical score"""
+    p_score = 0
+    p_score += simple_activity_eval(chess,board,piece_dict)
+#    p_score += pawn_promo_eval(chess,board,piece_dict) #either, but not both (double counting)
+    p_score += pawn_structure_eval(chess,board,piece_dict)
     return p_score
     
 def simple_activity_eval(chess,board,piece_dict):
@@ -111,6 +120,41 @@ def pawn_structure_eval(chess,board,piece_dict):
     pawn_score += -bool(W_islands-2)*0.2*W_islands/2.0+bool(B_islands-2)*0.2*B_islands/2.0
     pawn_score += -W_extra*0.4+B_extra*0.4
     pawn_score += W_passers-B_passers
+    #promo eval
+    for x in range(8):
+        if bool(wpp[x+1]) and not(bpp[x]+bpp[x+1]+bpp[x+2]): #no opponent pawns -1, 0, 1
+            for y in range(8):
+                if board[y][x]=='P':
+                    pawn_score += 0.1*(8-y)
+#                    break #(valid?)
+        if bool(bpp[x+1]) and not(wpp[x]+wpp[x+1]+wpp[x+2]):
+            for y in range(8):
+                if board[7-y][x]=='p':
+                    pawn_score += -0.1*y
+    return pawn_score
+    
+def pawn_promo_eval(chess,board,piece_dict):
+    """Analyzes pawn structure and promotion chances"""
+    pawn_score = 0
+    wpp = [0,0,0,0,0,0,0,0,0,0] #white pawn profile, length 10 to shift with pawn islands and promotions
+    bpp = [0,0,0,0,0,0,0,0,0,0] #black pawn profile
+    for y in range(8):
+        for x in range(8): #for x position in row
+            if board[y][x] == 'p':
+                bpp[x+1] += 1
+#                pawn_score += -()
+            if board[y][x] == 'P':
+                wpp[x+1] += 1
+    for x in range(8):
+        if bool(wpp[x+1]) and not(bpp[x]+bpp[x+1]+bpp[x+2]): #no opponent pawns -1, 0, 1
+            for y in range(8):
+                if board[y][x]=='P':
+                    pawn_score += 0.1*(8-y)
+#                    break #(valid?)
+        if bool(bpp[x+1]) and not(wpp[x]+wpp[x+1]+wpp[x+2]):
+            for y in range(8):
+                if board[7-y][x]=='p':
+                    pawn_score += -0.1*y
     return pawn_score
     
 def xor(p,q):
