@@ -260,13 +260,23 @@ class ChessBoard:
         elif self._board[y][x].islower():
             return self.SBLACK
 
+#    def getColor(self,x,y):
+#        if self._board[y][x] == '.':
+#            return self.NOCOLOR
+#        elif self._board[y][x].isupper():
+#            return self.WHITE
+#        elif self._board[y][x].islower():
+#            return self.BLACK
+#            
+#    
     def getColor(self,x,y):
-        if self._board[y][x] == '.':
-            return self.NOCOLOR
-        elif self._board[y][x].isupper():
+        color = self._board[y][x]        
+        if 'A'<= color <='Z':
             return self.WHITE
-        elif self._board[y][x].islower():
+        elif 'a'<= color <='z':
             return self.BLACK
+        else:
+            return self.NOCOLOR
                 
     def isThreatened(self,lx,ly,player=None):
 

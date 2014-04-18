@@ -22,10 +22,10 @@ class ChessClient:
         controller = Controller(chess)        
         running = True
         
-        player_1 = Human(ChessBoard.WHITE)
+#        player_1 = Human(ChessBoard.WHITE)
 #        player_2 = Human(ChessBoard.BLACK)
-#        AI1ply = 4
-#        player_1 = ChessAI(ChessBoard.WHITE,chess,evaluation_functions.terminal_eval,prune_functions.never_prune,AI1ply)
+        AI1ply = 2
+        player_1 = ChessAI(ChessBoard.WHITE,chess,evaluation_functions.terminal_eval2,prune_functions.never_prune,AI1ply)
         AI2ply = 2
         player_2 = ChessAI(ChessBoard.BLACK,chess,evaluation_functions.terminal_eval,prune_functions.never_prune,AI2ply)
 ##        AI_color = ChessBoard.BLACK

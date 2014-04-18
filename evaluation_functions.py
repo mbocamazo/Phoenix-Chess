@@ -6,7 +6,7 @@ Created on Sun Apr  6 00:58:55 2014
 """
 import numpy as np
 
-def terminal_eval(chess):
+def terminal_eval_simple(chess,alpha,beta):
     """returns sum of individual evaluation functions"""
     if chess.isGameOver():
         if chess.getGameResult() == 1:
@@ -27,10 +27,38 @@ def terminal_eval(chess):
                 else:
                     piece_dict[piece] = 1
         score += simple_material_eval(chess,piece_dict)
+        return score
+
+def terminal_eval(chess,alpha,beta):
+    """returns sum of individual evaluation functions"""
+    if chess.isGameOver():
+        if chess.getGameResult() == 1:
+            score = 100000
+        elif chess.getGameResult() == 2:
+            score = -100000
+        else:
+            score = 0
+        return score
+    else:
+        score = 0
+        board = chess.getShallowBoard()
+        piece_dict = {}
+        for row in board:
+            for piece in row:
+                if piece in piece_dict:
+                    piece_dict[piece] += 1
+                else:
+                    piece_dict[piece] = 1
+        score += simple_material_eval(chess,piece_dict)
+
+        if score < alpha - 2 or score > beta + 2:
+            return score
+
         score += simple_pos_eval(chess,board,piece_dict)
         return score
         
-def terminal_eval2(chess):
+def terminal_eval2(chess,alpha,beta):
+    """returns sum of individual evaluation functions"""
     """returns sum of individual evaluation functions"""
     if chess.isGameOver():
         if chess.getGameResult() == 1:
@@ -51,7 +79,7 @@ def terminal_eval2(chess):
                 else:
                     piece_dict[piece] = 1
         score += simple_material_eval(chess,piece_dict)
-        score += simple_pos_eval2(chess,board,piece_dict)
+        score += simple_pos_eval3(chess,board,piece_dict)
         return score
     
 def simple_material_eval(chess,piece_dict):
@@ -79,6 +107,14 @@ def simple_pos_eval2(chess,board,piece_dict):
     p_score += simple_activity_eval(chess,board,piece_dict)
 #    p_score += pawn_promo_eval(chess,board,piece_dict) #either, but not both (double counting)
     p_score += pawn_structure_eval(chess,board,piece_dict)
+    return p_score
+    
+def simple_pos_eval3(chess,board,piece_dict):
+    """Analyzes positional control and returns numerical score"""
+    p_score = 0
+    p_score += simple_activity_eval(chess,board,piece_dict)
+    p_score += pawn_promo_eval(chess,board,piece_dict) #either, but not both (double counting)
+#    p_score += pawn_structure_eval(chess,board,piece_dict)
     return p_score
     
 def simple_activity_eval(chess,board,piece_dict):

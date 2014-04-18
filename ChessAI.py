@@ -158,7 +158,7 @@ class ChessAI(Player):
         """negamax function.  Depth is a positive integer."""
         self.chess.nodesSearched += 1
         if depth == 0 or self.chess.isGameOver() or self.should_prune_func(self.chess): #and not continue q search (chess)
-            board_weight = player_num * self.eval_func(self.chess)
+            board_weight = player_num * self.eval_func(self.chess,alpha,beta)
             return board_weight
         valid_moves = self.get_valid_moves()
         scored_valid_moves = self.score_move_order(valid_moves)
