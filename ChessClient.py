@@ -5,9 +5,11 @@ from pprint import pprint
 from ChessAI import *
 import evaluation_functions
 import prune_functions
+import QFunctions
 from copy import deepcopy
 from pprint import pprint
 import pygame
+import run_genetic_algorithms
 from ChessBoard import ChessBoard
     
 class ChessClient:
@@ -21,13 +23,18 @@ class ChessClient:
         view = PyGameWindowView(chess,screen)
         controller = Controller(chess)        
         running = True
+#        
+        paired_piece_weights_1 = run_genetic_algorithms.build_random_pair_piece_dict()    
+        paired_piece_weights_2 = run_genetic_algorithms.build_random_pair_piece_dict()    
         
-#        player_1 = Human(ChessBoard.WHITE)
-#        player_2 = Human(ChessBoard.BLACK)
-        AI1ply = 2
-        player_1 = ChessAI(ChessBoard.WHITE,chess,evaluation_functions.terminal_eval2,prune_functions.never_prune,AI1ply)
-        AI2ply = 2
-        player_2 = ChessAI(ChessBoard.BLACK,chess,evaluation_functions.terminal_eval,prune_functions.never_prune,AI2ply)
+        player_1 = Human(ChessBoard.WHITE)
+        player_2 = Human(ChessBoard.BLACK)
+#        AI1ply = 2
+#        player_1 = ChessAI(ChessBoard.WHITE,chess,evaluation_functions.terminal_paired_material_eval,
+#                           prune_functions.never_prune,QFunctions.simple_end_game,paired_piece_weights_1,AI1ply)
+#        AI2ply = 2
+#        player_2 = ChessAI(ChessBoard.BLACK,chess,evaluation_functions.terminal_paired_material_eval,
+#                           prune_functions.never_prune,QFunctions.simple_end_game,paired_piece_weights_2,AI2ply)
 ##        AI_color = ChessBoard.BLACK
 #        player_color = ChessBoard.WHITE
 #        human_player = Player(player_color)
@@ -143,6 +150,7 @@ class Controller:
                             self.chess.markPos[1] = self.chess.mousePos[1]
                             #sets the selected piece position equal to the mouse position
                             self.chess.validMoves = self.chess.getValidMoves(tuple(self.chess.markPos))
+                            print "selected square: "+str(self.chess.markPos)
 #                            print self.chess.validMoves
                             
                         else:
@@ -153,6 +161,16 @@ class Controller:
                                     res = self.chess.addMove(self.chess.markPos,self.chess.mousePos)                                            
                                 if res:
                                     print self.chess.getLastTextMove(self.chess.SAN)
+#                                    print "controller printing white king lines: "
+#                                    print self.chess.w_king_x
+#                                    print self.chess.w_king_y
+#                                    print self.chess.w_king_diag_1
+#                                    print self.chess.w_king_diag_2
+#                                    print "controller printing black king lines: "
+#                                    print self.chess.b_king_x
+#                                    print self.chess.b_king_y
+#                                    print self.chess.b_king_diag_1
+#                                    print self.chess.b_king_diag_2
                                     self.chess.markPos[0] = -1
                                     self.chess.validMoves = [] 
 

@@ -57,6 +57,59 @@ def terminal_eval(chess,alpha,beta):
         score += simple_pos_eval(chess,board,piece_dict)
         return score
         
+def terminal_paired_material_eval(chess,alpha,beta,paired_piece_weights):
+    """returns sum of individual evaluation functions
+    this one calls a modified material eval that considers pairs of pieces 
+    in evaluating piece vals.AI passes this function its unique
+    paired_piece_weights dictionary when calling it"""
+    if chess.isGameOver():
+        if chess.getGameResult() == 1:
+            score = 100000
+        elif chess.getGameResult() == 2:
+            score = -100000
+        else:
+            score = 0
+        return score
+    else:
+        score = 0
+        board = chess.getShallowBoard()
+        piece_dict = {}
+        for row in board:
+            for piece in row:
+                if piece in piece_dict:
+                    piece_dict[piece] += 1
+                else:
+                    piece_dict[piece] = 1
+        score += paired_material_eval(piece_dict,paired_piece_weights)
+
+        if score < alpha - 2 or score > beta + 2:
+            return score
+
+        score += simple_pos_eval(chess,board,piece_dict)
+        return score
+        
+def paired_material_eval(piece_dict,paired_score_dict):
+    """scores the board based on pieces and pairs of pieces present. The AI
+    class passes this function paired_piece_weights when called through terminal_paired_material_eval, a dictionary
+    that is unique to every AI. pieces have
+    some intrinsic value and that value is modified based on the presence or lackthereof
+    of all other pieces. (exclulding pawns and kings)"""
+    single_score_dict = {'r':-5,'n':-3,'b':-3.25,'q':-9,'k':-10000,'p':-1,'.':0,'P':1,'R':5,'N':3,'B':3.25,'Q':9,'K':10000}
+    m_score = 0
+    for piece in piece_dict:
+        m_score += single_score_dict[piece]*piece_dict[piece]    
+    piece_dict.pop('.',None)
+    piece_dict.pop('k',None)
+    piece_dict.pop('K',None)
+    piece_dict.pop('p',None)
+    piece_dict.pop('P',None)#remove all pieces that aren't relevant to pair weighting
+    for p in piece_dict:
+        pair_dict = paired_score_dict[p]
+        for pair_piece in pair_dict:
+            if pair_piece in piece_dict:
+                m_score += pair_dict[pair_piece]*piece_dict[pair_piece]
+    return m_score
+        
 def terminal_eval2(chess,alpha,beta):
     """returns sum of individual evaluation functions"""
     """returns sum of individual evaluation functions"""

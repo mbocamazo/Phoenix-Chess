@@ -102,6 +102,14 @@ class ChessBoard:
         self.validMoves = []
         self.nodesSearched = 0
         self.moveNumber = 0
+        self.w_king_x = 4
+        self.w_king_y = 7
+        self.w_king_diag_1 = [(3,6),(2,5),(1,4),(0,3)]
+        self.w_king_diag_2 = [(5,6),(6,5),(7,4)]
+        self.b_king_x = 4
+        self.b_king_y = 0
+        self.b_king_diag_1 = [(5,1),(6,2),(7,3)] 
+        self.b_king_diag_2 = [(3,1),(2,2),(1,3),(0,4)]
 
     def state2str(self):
 
@@ -192,7 +200,29 @@ class ChessBoard:
                     self._white_king_location = (x,y)
                 if self._board[y][x] == "k":
                     self._black_king_location = (x,y)
-    
+                    
+    def updateKingLines(self,king_pos):
+        if self._turn == self.WHITE:
+            self.w_king_x = king_pos[0]
+            self.w_king_y = king_pos[1]
+            self.w_king_diag_1 = [] 
+            self.w_king_diag_2 = []
+            for i in range(1,8): #loop through squares that are diagonal to king
+                self.w_king_diag_1.append( (self.w_king_x+i,self.w_king_y+i) )
+                self.w_king_diag_1.append( (self.w_king_x-i,self.w_king_y-i) )
+                self.w_king_diag_2.append( (self.w_king_x+i,self.w_king_y-i) )
+                self.w_king_diag_2.append( (self.w_king_x-i,self.w_king_y+i) )
+        else:
+            self.b_king_x = king_pos[0]
+            self.b_king_y = king_pos[1]
+            self.b_king_diag_1 = [] 
+            self.b_king_diag_2 = []
+            for i in range(1,8): #loop through squares that are diagonal to king
+                self.b_king_diag_1.append( (self.b_king_x+i,self.b_king_y+i) )
+                self.b_king_diag_1.append( (self.b_king_x-i,self.b_king_y-i) )
+                self.b_king_diag_2.append( (self.b_king_x+i,self.b_king_y-i) )
+                self.b_king_diag_2.append( (self.b_king_x-i,self.b_king_y+i) )
+        
     def setEP(self,epPos):
         self._ep[0], self._ep[1] = epPos
    
@@ -203,26 +233,40 @@ class ChessBoard:
         
     def endGame(self, reason):
         self._game_result = reason
+        
+    def sameLineAsKing(self,piece_pos):
+        """returns whether there is a straight line between a piece and the king."""
+        px,py = piece_pos
+        if self._turn == self.WHITE:
+            if px == self.w_king_x or py == self.w_king_y:
+                return True
+            if piece_pos in self.w_king_diag_1 or piece_pos in self.w_king_diag_2:
+                return True
+        else:
+            if px == self.b_king_x or py == self.b_king_y:
+                return True
+            if piece_pos in self.b_king_diag_1 or piece_pos in self.b_king_diag_2:
+                return True
+        return False
                 
     def checkKingGuard(self,fromPos,moves,specialMoves={}):
         result = []
-        
         if self._turn == self.WHITE:
             kx,ky = self._white_king_location
         else:
             kx,ky = self._black_king_location
-        
         fx,fy = fromPos
-                
-        done = False
-        fp = self._board[fy][fx]
-        self._board[fy][fx] = "."
-        if not self.isThreatened(kx,ky):
-            done = True
-        self._board[fy][fx] = fp
         
-        if done:
-            return moves
+        if self.sameLineAsKing(fromPos): #must be in same line as king to be protecting him
+            done = False
+            fp = self._board[fy][fx]
+            self._board[fy][fx] = "." #check if my piece protects king before moving
+            if not self.isThreatened(kx,ky):
+                done = True
+            self._board[fy][fx] = fp
+            
+            if done:
+                return moves
         
         for m in moves:
             tx,ty = m
@@ -236,9 +280,9 @@ class ChessBoard:
             if specialMoves.has_key(m) and specialMoves[m] == self.EP_CAPTURE_MOVE:
                 sp = self._board[self._ep[1]][self._ep[0]]
                 self._board[self._ep[1]][self._ep[0]] = "."
-                            
-            if not self.isThreatened(kx,ky):
-                result.append(m)
+            
+            if not self.isThreatened(kx,ky): #check if my piece protects king after moving
+                    result.append(m)
 
             if sp:
                 self._board[self._ep[1]][self._ep[0]] = sp
@@ -644,6 +688,7 @@ class ChessBoard:
 
             
         self.updateKingLocations()
+        self.updateKingLines(toPos) #update the location of diagonals, rows, and cols the king is in
         return True
 
     def moveQueen(self,fromPos,toPos):

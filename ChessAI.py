@@ -27,7 +27,7 @@ class Human(Player):
 class ChessAI(Player):
     BOARDWIDTH = 8
     #write eval_func and should_prune_func and pass it into chessclient when it initalizes AIs
-    def __init__(self,color,chess,eval_func,should_prune_func,ply):
+    def __init__(self,color,chess,eval_func,should_prune_func,q_func,paired_piece_weights,ply):
         """AI gets passed the evaluation function and prune function it will use when searching 
         the game tree. Prune returns a true or false value telling you if the AI should continue
         searching the children of a node, while the eval_func returns the score of the board"""
@@ -35,11 +35,19 @@ class ChessAI(Player):
         self.chess = chess
         self.eval_func = eval_func
         self.should_prune_func = should_prune_func 
+        self.should_go_deeper = q_func
+        self.paired_piece_weights = paired_piece_weights
+        self.swiss_tourn_score = 0
         self.ply = ply
  
     def make_random_next_move(self):
+        self.chess.addMove(self.get_random_next_move())
+        
+    def get_random_next_move(self):
         valid_moves = self.get_valid_moves()
-        self.chess.addMove(random.choice(valid_moves))
+        if len(valid_moves) == 0:
+            return None
+        return random.choice(valid_moves())        
         
     def make_next_move(self):
         """Get the next move from the AI. AI accesses board model to make its decision"""
@@ -58,16 +66,17 @@ class ChessAI(Player):
         self.chess.nodesSearched = 0
 #        print "best move " + str(best_move)
 #        best_move = random.choice(best_moves) #choose randomly amongst best_moves. If there's one element, the best move is chosen. If there are multiple elements with the same score, one element is randomly chosen 
-        player_before_add_move = self.chess.getTurn()   
-        ret = self.chess.addMove(best_move[0],best_move[1])
-        if ret != True:
-                print str(player_before_add_move)+" tried to make the illegal move" +str(best_move)
-                print "Reason: "
-                print self.chess.getReason()
-        if self.color == ChessBoard.WHITE:
-            print "white makes the move " + self.chess._formatAIMove(best_move)       
-        if self.color == ChessBoard.BLACK:
-            print "black makes the move " + self.chess._formatAIMove(best_move)
+        player_before_add_move = self.chess.getTurn()  
+        if best_move != None:
+            ret = self.chess.addMove(best_move[0],best_move[1])
+            if ret != True:
+                    print str(player_before_add_move)+" tried to make the illegal move" +str(best_move)
+                    print "Reason: "
+                    print self.chess.getReason()
+            if self.color == ChessBoard.WHITE:
+                print "white makes the move " + self.chess._formatAIMove(best_move)       
+            if self.color == ChessBoard.BLACK:
+                print "black makes the move " + self.chess._formatAIMove(best_move)
             
             
     def negamax(self,depth,player_num,is_top_layer=False):
@@ -157,9 +166,14 @@ class ChessAI(Player):
     def negamax_ab_move_order(self,depth,player_num,alpha,beta,is_top_layer=False):
         """negamax function.  Depth is a positive integer."""
         self.chess.nodesSearched += 1
-        if depth == 0 or self.chess.isGameOver() or self.should_prune_func(self.chess): #and not continue q search (chess)
-            board_weight = player_num * self.eval_func(self.chess,alpha,beta)
-            return board_weight
+        if (depth <= 0 or self.chess.isGameOver() or self.should_prune_func(self.chess)) and not self.should_go_deeper(self.chess,depth): 
+    #            board_weight = player_num * self.eval_func(self.chess,alpha,beta)     #use this line for all other eval funcs       
+                board_weight = player_num * self.eval_func(self.chess,alpha,beta,self.paired_piece_weights) #this line is for the paired_piece_eval func        
+                if is_top_layer:
+                    "print: WARNING, negamax cut off search on first node, returning a random move!"
+                    return board_weight,self.get_random_next_move()
+                else:
+                    return board_weight
         valid_moves = self.get_valid_moves()
         scored_valid_moves = self.score_move_order(valid_moves)
         capture_moves_left_in_dict = True
