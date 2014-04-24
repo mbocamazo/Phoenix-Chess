@@ -27,7 +27,7 @@ class Human(Player):
 class ChessAI(Player):
     BOARDWIDTH = 8
     #write eval_func and should_prune_func and pass it into chessclient when it initalizes AIs
-    def __init__(self,color,chess,eval_func,should_prune_func,q_func,paired_piece_weights,ply):
+    def __init__(self,color,chess,eval_func,should_prune_func,q_func,piece_weights,ply):
         """AI gets passed the evaluation function and prune function it will use when searching 
         the game tree. Prune returns a true or false value telling you if the AI should continue
         searching the children of a node, while the eval_func returns the score of the board"""
@@ -36,8 +36,7 @@ class ChessAI(Player):
         self.eval_func = eval_func
         self.should_prune_func = should_prune_func 
         self.should_go_deeper = q_func
-        self.paired_piece_weights = paired_piece_weights
-        self.swiss_tourn_score = 0
+        self.piece_weights = piece_weights
         self.ply = ply
  
     def make_random_next_move(self):
@@ -78,66 +77,6 @@ class ChessAI(Player):
             if self.color == ChessBoard.BLACK:
                 print "black makes the move " + self.chess._formatAIMove(best_move)
             
-            
-    def negamax(self,depth,player_num,is_top_layer=False):
-        """negamax function.  Depth is a positive integer."""
-        self.chess.nodesSearched += 1
-        best_score = -np.inf
-        if depth == 0 or self.chess.isGameOver() or self.should_prune_func(self.chess): #and not continue q search (chess)
-            board_weight = player_num * self.eval_func(self.chess)
-            return board_weight
-#            return board_weight+5*random.random()-0.5 #temporary symmetry breaking
-        valid_moves = self.get_valid_moves()
-        for candidate in valid_moves:
-            move_is_legal = self.chess.addMove(candidate[0],candidate[1])
-            if not(move_is_legal):
-                print "Illegal Move Attempted"
-            score = -1*self.negamax(depth-1,-player_num)
-            score += (random.random()-.5)/10.0 #stops moves from being tied by adding small random amounts
-            if score > best_score:
-                best_score = score
-                best_move = candidate
-            self.chess.undo()
-        if is_top_layer:
-            print "nodes evaluated: "+str(self.chess.nodesSearched)
-#            self.chess.nodesSearched = 0
-            return best_score,best_move
-        else:
-            return best_score
-            
-    def alpha_beta_pruned_negamax(self,depth,a,b,player_num,is_top_layer=False):
-        """negamax function with alpha beta pruning.  Depth is a positive integer.
-        a should be set to neg infinity when called, b set to positive infinity"""
-        self.chess.nodesSearched += 1
-#        print self.chess.nodesSearched
-        if depth == 0 or self.chess.isGameOver() or self.should_prune_func(self.chess):
-            board_weight = player_num * self.eval_func(self.chess)
-            return board_weight
-        best_score = -np.inf
-        valid_moves = self.get_valid_moves()        
-        for candidate in valid_moves:
-            move_is_legal = self.chess.addMove(candidate[0],candidate[1])
-            if not(move_is_legal):
-                print "Illegal Move Attempted"
-            score = -1*self.alpha_beta_pruned_negamax(depth-1,-b,-a,-player_num)
-            print self.chess.getLastTextMove()
-            self.chess.undo()
-#            if is_top_layer:
-#                score += (random.random()-.5)/10.0 #stops moves from being tied by adding small random amounts
-            if score > best_score:
-                best_score = score
-                best_move = candidate
-            if score > a:
-                a = score
-            if a >= b:
-                break
-        if is_top_layer:
-            print "nodes evaluated: "+str(self.chess.nodesSearched)
-#            self.chess.nodesSearched = 0
-            return best_score,best_move
-        else:
-            return best_score
-            
     def negamax_ab_2(self,depth,player_num,alpha,beta,is_top_layer=False):
         """negamax function.  Depth is a positive integer."""
         self.chess.nodesSearched += 1
@@ -168,7 +107,7 @@ class ChessAI(Player):
         self.chess.nodesSearched += 1
         if (depth <= 0 or self.chess.isGameOver() or self.should_prune_func(self.chess)) and not self.should_go_deeper(self.chess,depth): 
     #            board_weight = player_num * self.eval_func(self.chess,alpha,beta)     #use this line for all other eval funcs       
-                board_weight = player_num * self.eval_func(self.chess,alpha,beta,self.paired_piece_weights) #this line is for the paired_piece_eval func        
+                board_weight = player_num * self.eval_func(self.chess,alpha,beta,self.piece_weights) #this line is for the paired_piece_eval func        
                 if is_top_layer:
                     "print: WARNING, negamax cut off search on first node, returning a random move!"
                     return board_weight,self.get_random_next_move()

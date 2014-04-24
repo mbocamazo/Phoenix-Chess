@@ -183,7 +183,7 @@ class ChessBoard:
                
     def threeRepetitions(self):
             
-        ts = self._three_rep_stack[:self._state_stack_pointer]
+        ts = self._three_rep_stack[:self._state_stack_pointer+1] #added a plus one here without much of a reason
 
         if not len(ts):
             return False

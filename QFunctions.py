@@ -14,7 +14,7 @@ def simple_end_game(chess,depth):
 #    print "qfunc depth: "+str(depth)
     if depth <= MAXIMUM_DEPTH_EXTENSION or depth > 0:
         return False
-    if piece_count(chess) < END_GAME_PIECE_COUNT: #if one side has less than a certain amount of pieces, trigger deeper ply search
+    if piece_count(chess) < END_GAME_PIECE_COUNT: #if the board has less than a certain amount of pieces, trigger deeper ply search
         return True
 
 def no_extension(chess,depth):

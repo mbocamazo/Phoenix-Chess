@@ -57,6 +57,48 @@ def terminal_eval(chess,alpha,beta):
         score += simple_pos_eval(chess,board,piece_dict)
         return score
         
+def terminal_dict_material_eval(chess,alpha,beta,piece_weights):
+    """returns sum of individual evaluation functions
+    this one calls a modified material eval that considers pairs of pieces 
+    in evaluating piece vals.AI passes this function its unique
+    piece_weights dictionary when calling it"""
+    if chess.isGameOver():
+        if chess.getGameResult() == 1:
+            score = 100000
+        elif chess.getGameResult() == 2:
+            score = -100000
+        else:
+            score = 0
+        return score
+    else:
+        score = 0
+        board = chess.getShallowBoard()
+        piece_dict = {}
+        for row in board:
+            for piece in row:
+                if piece in piece_dict:
+                    piece_dict[piece] += 1
+                else:
+                    piece_dict[piece] = 1
+        score += dict_material_eval(piece_dict,piece_weights)
+
+        if score < alpha - 2 or score > beta + 2:
+            return score
+
+        score += simple_pos_eval(chess,board,piece_dict)
+        return score        
+        
+def dict_material_eval(piece_dict,score_dict):
+    """scores the board based on pieces present. The AI
+    class passes this function piece_weights when called through terminal_paired_material_eval, a dictionary
+    that is unique to every AI. pieces have
+    some intrinsic value as defined by the dictionary."""
+    m_score = 0
+    piece_dict.pop('.',None) #remove all pieces that aren't relevant to pair weighting
+    for piece in piece_dict:
+        m_score += score_dict[piece]*piece_dict[piece]    
+    return m_score
+        
 def terminal_paired_material_eval(chess,alpha,beta,paired_piece_weights):
     """returns sum of individual evaluation functions
     this one calls a modified material eval that considers pairs of pieces 
