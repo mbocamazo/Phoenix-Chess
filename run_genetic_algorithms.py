@@ -25,6 +25,8 @@ class Schedule:
         self.mut_mag_calc_func = mut_mag_calc_func
         self.generations = generations
         self.population_size = 4
+        self.tournaments = []
+        self.final_AI_pop = None
         
     def run_schedule(self):
         initial_tourn = SwissTournamentSimpleEvalNewAI(self.population_size,0)
@@ -32,15 +34,19 @@ class Schedule:
         for g in range(0,self.generations):
             t = SwissTournamentSimpleEvalExistingAI(AI_list) #this sorts AI by fitness
             t.play_tourn()
+            self.tournaments.append(t)
             self.recombine_genes(AI_list) #order of list must be maintained         
             self.mutate_genes(AI_list,g) #order of list must be maintained
             print "piece weights of AI of generation "+str(g)
             for ai in AI_list:
-                print "AI "+ str(ai.id) +"'s piece weights"
-                piece_weights = ai.piece_weights
-                print piece_weights
+                ai.tournament_score = 0
+#                print "AI "+ str(ai.id) +"'s piece weights"
+#                piece_weights = ai.piece_weights
+#                print piece_weights
+        self.final_AI_pop = AI_list
         
     def recombine_genes(self,AI_list):
+        """doesnt modify order of AI list"""
         AI_num = len(AI_list)
         quartile = AI_num/4         
         for i in range(0,quartile):
@@ -53,6 +59,7 @@ class Schedule:
                     worse_genome[piece] = score
         
     def mutate_genes(self,AI_list,generation_num):
+        """doesnt modify order of AI list"""
         for i in range(1,len(AI_list)): #mutate everything but the best AI
             genome = AI_list[i].piece_weights            
             for piece,score in genome.iteritems():
