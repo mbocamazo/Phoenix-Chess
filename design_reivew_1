@@ -1,0 +1,43 @@
+Mike and Dennis Design Review
+
+______________________________________
+
+Concrete things we want from Audience
+_____________________________________
+-How are you implementing quiescience search?
+-What specific aspects of our current structures would you ML on?
+-How do you plan on going about ML and is it applicable to our project?
+_____________________________________
+What we've done so far
+
+-Gotten a incompletely implemented chess program
+-Waded through non OBO code to get our AI integrated into the program
+-begun implementation of tree search w/ basic board eval function
+_____________________________________
+ Lay out the plan
+
+-quickly explain tree search
+-implement alpha beta pruning
+-implement quiescience search
+-transposition tables??
+-we want your opinion before we tell you how we currently plan to do ML
+_____________________________________
+What we're unsure of (open it to audience for response, QA format)
+
+-what insights do you have on quiescience search?
+-if you were going to go about ML on this structure, how would you do it?
+	-what would you quantify on the board?
+	-what would you weight and try to learn on?
+-what's your personal plan of attack for ML and do you see it being applicable
+to our project? 
+_____________________________________
+The original rest of our plan using ML
+
+-use genetic algorithms to learn dynamic piece weights
+-use genetic algorithms to learn on the quiescience search function
+_____________________________________
+Open it up to general comments, questions concerns.
+_____________________________________
+Thanks for listening and thanks for the feedback!
+
+
