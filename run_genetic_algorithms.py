@@ -24,19 +24,19 @@ class Schedule:
         self.mut_prob = mut_prob
         self.mut_mag_calc_func = mut_mag_calc_func
         self.generations = generations
-        self.population_size = 16
+        self.population_size = 4
         
     def run_schedule(self):
         initial_tourn = SwissTournamentSimpleEvalNewAI(self.population_size,0)
         AI_list = initial_tourn.AI_list
         for g in range(0,self.generations):
-#            t = SwissTournamentSimpleEvalExistingAI(AI_list) #this sorts AI by fitness
-#            t.play_tourn()
-            AI_list = self.recombine_genes(AI_list) #order of list must be maintained            
-            AI_list = self.mutate_genes(AI_list,g) #order of list must be maintained
+            t = SwissTournamentSimpleEvalExistingAI(AI_list) #this sorts AI by fitness
+            t.play_tourn()
+            self.recombine_genes(AI_list) #order of list must be maintained         
+            self.mutate_genes(AI_list,g) #order of list must be maintained
             print "piece weights of AI of generation "+str(g)
             for ai in AI_list:
-                print "AI "+ ai.id +"'s piece weights"
+                print "AI "+ str(ai.id) +"'s piece weights"
                 piece_weights = ai.piece_weights
                 print piece_weights
         
@@ -47,28 +47,27 @@ class Schedule:
             better_AI = AI_list[i]
             worse_AI = AI_list[-(i+1)]
             better_genome = better_AI.piece_weights
-            worse_genome = worse_AI.piece_weights
-            print better_genome
-            print worse_genome
-            for piece,score in better_genome:
+            worse_genome = worse_AI.piece_weights          
+            for piece,score in better_genome.iteritems():
                 if rand() < self.recom_prob:
                     worse_genome[piece] = score
         
     def mutate_genes(self,AI_list,generation_num):
         for i in range(1,len(AI_list)): #mutate everything but the best AI
             genome = AI_list[i].piece_weights            
-            for piece,score in genome:
+            for piece,score in genome.iteritems():
                 if rand() < self.mut_prob:
                     mut_mag = self.mut_mag_calc_func(generation_num)
+                    print mut_mag
                     score += 2*(rand()-0.5)*mut_mag
                     
 def anneal_sched_mut_mag(generation_num):
     mut_mag = None    
-    if 0 < generation_num < 40:
+    if 0 <= generation_num < 40:
         mut_mag = 1-generation_num/40.0
-    if 40< generation_num < 50:
+    if 40<= generation_num < 50:
         mut_mag = .1
-    if 50< generation_num < 55:
+    if 50<= generation_num <= 55:
         mut_mag = 0
     return mut_mag
                 
@@ -97,7 +96,7 @@ class SwissTournamentSimpleEvalExistingAI:
         self.AI_list = AI_list
         self.game_dict = {}
         AI_num = len(AI_list)
-        self.round_num = math.ceil(math.log(AI_num,2))
+        self.round_num = int(math.ceil(math.log(AI_num,2)))
             
     def play_tourn(self):
         for i in range(self.round_num):
@@ -274,7 +273,7 @@ def watch_game(saved_moves):
     pygame.quit()
 
 if __name__ == '__main__': 
-    s = Schedule(.1,.2,anneal_sched_mut_mag,55)
+    s = Schedule(.25,.2,anneal_sched_mut_mag,4)
     s.run_schedule()
 #    t = SwissTournamentSimpleEval(4,2)
 #    print t.AI_list
