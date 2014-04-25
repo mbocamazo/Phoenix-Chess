@@ -8,6 +8,7 @@ base class from which we's gonna run some genetic algorithms
 """
 from ChessBoard import ChessBoard
 from ChessAI import ChessAI
+from multiprocessing import Pool
 import random
 #import pygame
 from ChessClient import *
@@ -16,6 +17,7 @@ import prune_functions
 import QFunctions
 import math
 import multiprocessing
+import pickle as p
 
 class Schedule:
     
@@ -106,15 +108,23 @@ class SwissTournamentSimpleEvalExistingAI:
         AI_num = len(AI_list)
         self.round_num = int(math.ceil(math.log(AI_num,2)))
             
-    def play_tourn(self):
+    def play_tourn(self):        
         for i in range(self.round_num):
+            pool = Pool(processes=len(self.AI_list)/2)
+            games = []
             for j in range(0,len(self.AI_list),2):
                 p1 = self.AI_list[j]
                 p2 = self.AI_list[j+1]
                 g = Game(p1,p2)
+                games.append(g)
                 self.game_dict[g.id] = g
-                g.play_game()
-                self.AI_list.sort(key=lambda x: x.tournament_score, reverse=True)
+                
+            pool.map(play_game,games) #parallelize game playing
+            self.AI_list.sort(key=lambda x: x.tournament_score, reverse=True)
+            
+def play_game(game):
+    """helper function for multithreading"""
+    game.play_game()
     
 class SwissTournamentSimpleEvalNewAI:    
     """runs a swiss tournament between a specified number of
@@ -135,19 +145,18 @@ class SwissTournamentSimpleEvalNewAI:
             
     def play_tourn(self):
         for i in range(self.round_num):
-#            pool = Pool(processes = self.AI_list/2)
+            pool = Pool(processes = self.AI_list/2)
             g_list = []
             for j in range(0,len(self.AI_list),2):
                 p1 = self.AI_list[j]
                 p2 = self.AI_list[j+1]
                 print "playing game between AI "+str(p1.id) +" and AI "+str(p2.id)
                 g = Game(p1,p2)
-#                g_list.append(multiprocessing.Process(g.play_game,g)
+
                 self.game_dict[g.id] = g
                 g_list.append(g)
-
-            [game.start() for game in g_list]            
-#            pool.map(g.play_game(),g_list)
+      
+            pool.map(g.play_game(),g_list)
             self.AI_list.sort(key=lambda x: x.tournament_score, reverse=True)
     
 class SwissTournamentPairEval:
@@ -210,7 +219,6 @@ class Game:
         self.w_player.chess = chess
         self.b_player.chess = chess
         while not chess.isGameOver():
-            print self.b_player.id
             self.w_player.make_next_move()
             if chess.isGameOver():
                 break
@@ -292,6 +300,9 @@ def build_random_piece_dict():
 if __name__ == '__main__': 
     s = Schedule(.25,.2,anneal_sched_mut_mag,4)
     s.run_schedule()
+    with open('evolved_AI_pop.p', 'wb') as f:
+        print "Saved to %s" % "evolved_AI_pop"
+        p.dump(s.final_AI_pop,f)
 #    t = SwissTournamentSimpleEval(4,2)
 #    print t.AI_list
 #    print t.game_dict
