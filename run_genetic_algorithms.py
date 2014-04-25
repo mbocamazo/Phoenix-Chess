@@ -17,6 +17,7 @@ import prune_functions
 import QFunctions
 import math
 import multiprocessing
+import pickle as p
 
 class Schedule:
     
@@ -298,6 +299,9 @@ def watch_game(saved_moves):
 if __name__ == '__main__': 
     s = Schedule(.25,.2,anneal_sched_mut_mag,4)
     s.run_schedule()
+    with open('evolved_AI_pop.p', 'wb') as f:
+        print "Saved to %s" % "evolved_AI_pop"
+        p.dump(s.final_AI_pop,f)
 #    t = SwissTournamentSimpleEval(4,2)
 #    print t.AI_list
 #    print t.game_dict
