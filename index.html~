@@ -78,14 +78,6 @@ Design</p>
   the AI will search into the game tree.
   <img src="https://github.com/mbocamazo/Phoenix-Chess/blob/gh-pages/images/UML_class_diagram.png?raw=true" alt="UML diag">
 </p>
-<p>Design Refinement</p>
-<p>Our minimum deliverable of a decent chess AI has been achieved, and we have started comparison of AIs based on use of different evaluation functions.</p>
-<p>As we have progressed into the machine learning-genetic algorithms stage, we have added class structures to support it.  A tournament class with tournament AIs and Games was added.  Games include two players, which include AIs or Humans.  These classes have a Chess Model, which holds a Controller and a View.  The AIs have modules of evaluation and pruning functions, which are not proper classes but are selected as attributes of an AI.  </p>
-<p>The board representation of a list of strings is much more time-intensive for calculations that standard 'bit boards', which encode all of the locations of the pieces as bits in binary integers specific to each piece class.  This representation would constitute a great deal of work to change, and because we are working in python, we will not achieve the efficiencies of professional AIs. For this reason, we've accepted the search depth of 4-6 as what we'll achieve in a relatively quick game. The AIs constructed all followed the same general pattern, so unit tests for adherence to certain expected moves were unnecessary after the excessive case checking through playtesting validation.  If large changes in the AI decision process were made, unit tests for expected moves would be necessary.</p>
-<p>The use of the computing cluster requires some small additions to pass the games correctly.  Manual multithreading of games may be necessary to run in a smaller time frame instead of all as a single sequence.</p>
-<p>Data structures within many of the chess model functions were changed significantly to make performance gains in calculations, allow for deeper searches and more complicated evaluation functions.  Cases in which the position of the king needed to be tested for check were consolidated for each branch within the tree search.  As a result, the search with positional evaluation went from calculating 700 nodes per second to upwards of 1500 nodes per second.    </p>
-<p>The most significant algorithm used is alpha-beta pruning within the tree search.  This may be explained simply in the following sequence, with Alice and Bob as players:  "If Alice knows she can do better with move #1 than a result of one of Bob's responses to move #2, Alice won't choose move #2, so stop searching" (M. Bocamazo).  With evaluating the moves in the order expected to generate cutoffs (stops in the search) more frequently, the search can effectively halve the exponent on the order of the bounding function.</p>
-<p>Menus should be added at the end of the project for greater user friendliness and usability.</p>
       </section>
     </div>
 
