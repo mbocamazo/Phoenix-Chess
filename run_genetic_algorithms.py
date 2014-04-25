@@ -8,6 +8,7 @@ base class from which we's gonna run some genetic algorithms
 """
 from ChessBoard import ChessBoard
 from ChessAI import ChessAI
+from multiprocessing import Pool
 import random
 import pygame
 from ChessClient import *
@@ -105,15 +106,23 @@ class SwissTournamentSimpleEvalExistingAI:
         AI_num = len(AI_list)
         self.round_num = int(math.ceil(math.log(AI_num,2)))
             
-    def play_tourn(self):
+    def play_tourn(self):        
         for i in range(self.round_num):
+            pool = Pool(processes=len(self.AI_list)/2)
+            games = []
             for j in range(0,len(self.AI_list),2):
                 p1 = self.AI_list[j]
                 p2 = self.AI_list[j+1]
                 g = Game(p1,p2)
+                games.append(g)
                 self.game_dict[g.id] = g
-                g.play_game()
-                self.AI_list.sort(key=lambda x: x.tournament_score, reverse=True)
+                
+            pool.map(play_game,games) #parallelize game playing
+            self.AI_list.sort(key=lambda x: x.tournament_score, reverse=True)
+            
+def play_game(game):
+    """helper function for multithreading"""
+    game.play_game()
     
 class SwissTournamentSimpleEvalNewAI:    
     """runs a swiss tournament between a specified number of
@@ -141,7 +150,8 @@ class SwissTournamentSimpleEvalNewAI:
                 g = Game(p1,p2)
                 self.game_dict[g.id] = g
                 g.play_game()
-                self.AI_list.sort(key=lambda x: x.tournament_score, reverse=True)
+                
+            self.AI_list.sort(key=lambda x: x.tournament_score, reverse=True)
     
 class SwissTournamentPairEval:
     """runs a swiss tournament between a specified number of
@@ -203,7 +213,10 @@ class Game:
         self.w_player.chess = chess
         self.b_player.chess = chess
         while not chess.isGameOver():
+            print self.w_player.id
             self.w_player.make_next_move()
+            if chess.isGameOver():
+                break
             self.b_player.make_next_move()
         r = chess.getGameResult()
         print r
