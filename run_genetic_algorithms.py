@@ -16,6 +16,7 @@ import evaluation_functions
 import prune_functions
 import QFunctions
 import math
+import multiprocessing
 
 class Schedule:
     
@@ -143,14 +144,17 @@ class SwissTournamentSimpleEvalNewAI:
             
     def play_tourn(self):
         for i in range(self.round_num):
+            pool = Pool(processes = self.AI_list/2)
+            g_list = []
             for j in range(0,len(self.AI_list),2):
                 p1 = self.AI_list[j]
                 p2 = self.AI_list[j+1]
                 print "playing game between AI "+str(p1.id) +" and AI "+str(p2.id)
                 g = Game(p1,p2)
                 self.game_dict[g.id] = g
-                g.play_game()
-                
+                g_list.append(g)
+      
+            pool.map(g.play_game(),g_list)
             self.AI_list.sort(key=lambda x: x.tournament_score, reverse=True)
     
 class SwissTournamentPairEval:
@@ -213,7 +217,6 @@ class Game:
         self.w_player.chess = chess
         self.b_player.chess = chess
         while not chess.isGameOver():
-            print self.w_player.id
             self.w_player.make_next_move()
             if chess.isGameOver():
                 break
