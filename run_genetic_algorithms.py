@@ -9,7 +9,7 @@ base class from which we's gonna run some genetic algorithms
 from ChessBoard import ChessBoard
 from ChessAI import ChessAI
 import random
-import pygame
+#import pygame
 from ChessClient import *
 import evaluation_functions
 import prune_functions
@@ -142,9 +142,9 @@ class SwissTournamentSimpleEvalNewAI:
                 p2 = self.AI_list[j+1]
                 print "playing game between AI "+str(p1.id) +" and AI "+str(p2.id)
                 g = Game(p1,p2)
-                g_list.append(multiprocessing.Process(g.play_game,g)
+#                g_list.append(multiprocessing.Process(g.play_game,g)
                 self.game_dict[g.id] = g
-                #                g_list.append(g)
+                g_list.append(g)
 
             [game.start() for game in g_list]            
 #            pool.map(g.play_game(),g_list)
@@ -264,30 +264,30 @@ def build_random_piece_dict():
         piece_score_dict[b.upper()] = -rand_num 
     return piece_score_dict
     
-def watch_game(saved_moves):
-    chess = ChessBoard()
-    screen = pygame.display.set_mode((480, 480),1)
-    pygame.display.set_caption('Saved Game')
-    view = PyGameWindowView(chess,screen)
-    print view
-    running = True
-    move_index = 0
-    
-    while running:
-        for event in pygame.event.get():
-            if event.type == QUIT:
-                running = False
-                pygame.quit()
-                return
-        raw_input("Press enter to watch next move...")
-        if move_index < len(saved_moves):
-            chess.addTextMove(saved_moves[move_index])
-        else:
-            break
-        move_index += 1
-        view.draw(chess)
-        pygame.display.flip()
-    pygame.quit()
+#def watch_game(saved_moves):
+#    chess = ChessBoard()
+#    screen = pygame.display.set_mode((480, 480),1)
+#    pygame.display.set_caption('Saved Game')
+#    view = PyGameWindowView(chess,screen)
+#    print view
+#    running = True
+#    move_index = 0
+#    
+#    while running:
+#        for event in pygame.event.get():
+#            if event.type == QUIT:
+#                running = False
+#                pygame.quit()
+#                return
+#        raw_input("Press enter to watch next move...")
+#        if move_index < len(saved_moves):
+#            chess.addTextMove(saved_moves[move_index])
+#        else:
+#            break
+#        move_index += 1
+#        view.draw(chess)
+#        pygame.display.flip()
+#    pygame.quit()
 
 if __name__ == '__main__': 
     s = Schedule(.25,.2,anneal_sched_mut_mag,4)

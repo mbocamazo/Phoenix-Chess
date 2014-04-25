@@ -8,7 +8,7 @@ import prune_functions
 import QFunctions
 from copy import deepcopy
 from pprint import pprint
-import pygame
+#import pygame
 import run_genetic_algorithms
 from ChessBoard import ChessBoard
     
@@ -17,10 +17,10 @@ class ChessClient:
     def mainLooptemp(self):     
 
         chess = ChessBoard()
-        clock = pygame.time.Clock()
-        screen = pygame.display.set_mode((480, 480),1)
-        pygame.display.set_caption('ChessBoard Client')
-        view = PyGameWindowView(chess,screen)
+#        clock = pygame.time.Clock()
+#        screen = pygame.display.set_mode((480, 480),1)
+#        pygame.display.set_caption('ChessBoard Client')
+#        view = PyGameWindowView(chess,screen)
         controller = Controller(chess)        
         running = True
 #        
@@ -46,28 +46,10 @@ class ChessClient:
             clock.tick(30)        
     
             if chess.getTurn() == player_1.color and not chess.isGameOver():
-                if type(player_1) == Human:
-                    for event in pygame.event.get():
-                        if event.type == QUIT:
-                            running = False
-                            pygame.quit()
-                            return
-                        else:
-                            controller.handle_event(event)   
-                else:
                     print "AI 1 (WHITE) making turn"
                     player_1.make_next_move()
                     chess.moveNumber += 1
             elif chess.getTurn() == player_2.color and not chess.isGameOver():
-                if type(player_2) == Human:
-                    for event in pygame.event.get():
-                        if event.type == QUIT:
-                            running = False
-                            pygame.quit()
-                            return
-                        else:
-                            controller.handle_event(event)   
-                else:
                     print "AI 2 (BLACK) making turn"
                     player_2.make_next_move()
                     chess.moveNumber += 1
@@ -79,22 +61,22 @@ class ChessClient:
 #                    board.updatewithMachine'sturn
                     
             if chess.isGameOver():
-                view.title_game_display(chess)
+#                view.title_game_display(chess)
                 chess.validMoves = []
                 chess.markPos[0] = -1
                 chess.markPos[1] = -1
-                for event in pygame.event.get():
-                    if event.type == QUIT:
-                        running = False
-                        pygame.quit()
-                        return
-            else:
-                pygame.display.set_caption('ChessBoard Client') 
+#                for event in pygame.event.get():
+#                    if event.type == QUIT:
+#                        running = False
+#                        pygame.quit()
+#                        return
+#            else:
+#                pygame.display.set_caption('ChessBoard Client') 
                                             
-            view.draw(chess)
-            pygame.display.flip()  
+#            view.draw(chess)
+#            pygame.display.flip()  
             
-        pygame.quit()
+#        pygame.quit()
         
 class Controller:
     def __init__(self,chess):
