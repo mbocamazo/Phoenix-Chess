@@ -9,8 +9,6 @@
 #####################################################################
 
 from copy import deepcopy
-from pprint import pprint
-#import pygame
 
 #MB 03/30: Promotion options already written in, just need to remove hard coding
 #of Queen promotion value, maybe add a pop-up menu to select piece

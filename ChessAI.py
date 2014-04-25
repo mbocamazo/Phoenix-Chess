@@ -9,8 +9,6 @@ from ChessBoard import ChessBoard
 import random
 from abc import ABCMeta, abstractmethod
 import numpy as np
-import time
-import cProfile
 
 class Player(object):
     __metaclass__ = ABCMeta
@@ -56,12 +54,7 @@ class ChessAI(Player):
             player_num = -1
 ##        best_moves = []
 #        best_score,best_move = self.negamax(self.ply,player_num,is_top_layer = True)
-        start_time = time.time()
         best_score,best_move = self.negamax_ab_move_order(self.ply,player_num,-np.inf,np.inf,is_top_layer=True)
-        current_time = time.time()
-        print "thinking time:   %.10f" % (current_time - start_time)
-        print "nodes/second:    " + str(self.chess.nodesSearched/(current_time-start_time))
-        print "score of best move: " + str(best_score)
         self.chess.nodesSearched = 0
 #        print "best move " + str(best_move)
 #        best_move = random.choice(best_moves) #choose randomly amongst best_moves. If there's one element, the best move is chosen. If there are multiple elements with the same score, one element is randomly chosen 
