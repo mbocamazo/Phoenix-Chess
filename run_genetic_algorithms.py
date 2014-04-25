@@ -14,7 +14,65 @@ from ChessClient import *
 import evaluation_functions
 import prune_functions
 import QFunctions
+import math
 
+class Schedule:
+    
+    def __init__(self,recom_prob,mut_prob,mut_mag_calc_func,generations):
+        """takes mutation probabilities and a tuple of mutation magnitudes for each generation"""
+        self.recom_prob = recom_prob
+        self.mut_prob = mut_prob
+        self.mut_mag_calc_func = mut_mag_calc_func
+        self.generations = generations
+        self.population_size = 16
+        
+    def run_schedule(self):
+        initial_tourn = SwissTournamentSimpleEvalNewAI(self.population_size,0)
+        AI_list = initial_tourn.AI_list
+        for g in range(0,self.generations):
+#            t = SwissTournamentSimpleEvalExistingAI(AI_list) #this sorts AI by fitness
+#            t.play_tourn()
+            AI_list = self.recombine_genes(AI_list) #order of list must be maintained            
+            AI_list = self.mutate_genes(AI_list,g) #order of list must be maintained
+            print "piece weights of AI of generation "+str(g)
+            for ai in AI_list:
+                print "AI "+ ai.id +"'s piece weights"
+                piece_weights = ai.piece_weights
+                print piece_weights
+        
+    def recombine_genes(self,AI_list):
+        AI_num = len(AI_list)
+        quartile = AI_num/4         
+        for i in range(0,quartile):
+            better_AI = AI_list[i]
+            worse_AI = AI_list[-(i+1)]
+            better_genome = better_AI.piece_weights
+            worse_genome = worse_AI.piece_weights
+            print better_genome
+            print worse_genome
+            for piece,score in better_genome:
+                if rand() < self.recom_prob:
+                    worse_genome[piece] = score
+        
+    def mutate_genes(self,AI_list,generation_num):
+        for i in range(1,len(AI_list)): #mutate everything but the best AI
+            genome = AI_list[i].piece_weights            
+            for piece,score in genome:
+                if rand() < self.mut_prob:
+                    mut_mag = self.mut_mag_calc_func(generation_num)
+                    score += 2*(rand()-0.5)*mut_mag
+                    
+def anneal_sched_mut_mag(generation_num):
+    mut_mag = None    
+    if 0 < generation_num < 40:
+        mut_mag = 1-generation_num/40.0
+    if 40< generation_num < 50:
+        mut_mag = .1
+    if 50< generation_num < 55:
+        mut_mag = 0
+    return mut_mag
+                
+            
 class TournamentAI(ChessAI):    
     
     last_initialized_id = None
@@ -28,8 +86,30 @@ class TournamentAI(ChessAI):
             TournamentAI.last_initialized_id += 1
         self.id = TournamentAI.last_initialized_id
         self.games_played_id = {}        
+        
+class SwissTournamentSimpleEvalExistingAI:    
+    """runs a swiss tournament between a list of specified
+    AI w/random pair weightings, given an AI list. Specified number must be an even number. 
+    Stores a list of AI sorted by rank, once the games have been played.
+    Also stores all games played for examination and testing.
+    AI has a simple material eval func"""
+    def __init__(self,AI_list):
+        self.AI_list = AI_list
+        self.game_dict = {}
+        AI_num = len(AI_list)
+        self.round_num = math.ceil(math.log(AI_num,2))
+            
+    def play_tourn(self):
+        for i in range(self.round_num):
+            for j in range(0,len(self.AI_list),2):
+                p1 = self.AI_list[j]
+                p2 = self.AI_list[j+1]
+                g = Game(p1,p2)
+                self.game_dict[g.id] = g
+                g.play_game()
+                self.AI_list.sort(key=lambda x: x.tournament_score, reverse=True)
     
-class SwissTournamentSimpleEval:    
+class SwissTournamentSimpleEvalNewAI:    
     """runs a swiss tournament between a specified number of
     AI w/random pair weightings. Specified number must be an even number. 
     Stores a list of AI sorted by rank, once the games have been played.
@@ -157,14 +237,15 @@ def build_random_pair_piece_dict():
 def build_random_piece_dict():
     """generates a random piece dictionary that is used by the
     material eval function. AI will store and pass this
-    dictionary/attribute to the material eval func."""
+    dictionary/attribute to the material eval func.king and pawn weights
+    are defined elsewhere in the evaluate simple material func
+    since they aren't uniquely determined"""
+    piece_score_dict = {}
     b_piece_list = ['r','n','b','q']
-    w_piece_list = ['R','N','B','Q']
-    piece_score_dict = {'p':-1,'P':1,'k':-10000,'K':10000}
     for b in b_piece_list:
-        piece_score_dict[b] = random.uniform(-10,0)  
-    for w in w_piece_list:
-        piece_score_dict[w] = random.uniform(0,10) 
+        rand_num = random.uniform(-10,0)
+        piece_score_dict[b] = rand_num  
+        piece_score_dict[b.upper()] = -rand_num 
     return piece_score_dict
     
 def watch_game(saved_moves):
@@ -193,12 +274,14 @@ def watch_game(saved_moves):
     pygame.quit()
 
 if __name__ == '__main__': 
-    t = SwissTournamentSimpleEval(4,2)
-    print t.AI_list
-    print t.game_dict
-    t.play_tourn()
-    print t.AI_list
-    print t.game_dict
+    s = Schedule(.1,.2,anneal_sched_mut_mag,55)
+    s.run_schedule()
+#    t = SwissTournamentSimpleEval(4,2)
+#    print t.AI_list
+#    print t.game_dict
+#    t.play_tourn()
+#    print t.AI_list
+#    print t.game_dict
 #    piece_dict_w = build_random_pair_piece_dict()
 #    piece_dict_b = build_random_pair_piece_dict()
 #    AI_w_ply = 2

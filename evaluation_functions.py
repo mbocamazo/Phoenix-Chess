@@ -93,10 +93,18 @@ def dict_material_eval(piece_dict,score_dict):
     class passes this function piece_weights when called through terminal_paired_material_eval, a dictionary
     that is unique to every AI. pieces have
     some intrinsic value as defined by the dictionary."""
+    dict_copy = {}
+    for p in score_dict:
+        dict_copy[p] = score_dict[p]
+        dict_copy[p.upper()] = -score_dict[p] #flip the lower case scores to give the reverse for upper case scores
+    dict_copy['p']=-1
+    dict_copy['P']= 1
+    dict_copy['k']=-10000
+    dict_copy['K']= 10000
     m_score = 0
     piece_dict.pop('.',None) #remove all pieces that aren't relevant to pair weighting
     for piece in piece_dict:
-        m_score += score_dict[piece]*piece_dict[piece]    
+        m_score += dict_copy[piece]*piece_dict[piece]    
     return m_score
         
 def terminal_paired_material_eval(chess,alpha,beta,paired_piece_weights):
