@@ -15,7 +15,7 @@ import prune_functions
 import QFunctions
 import math
 import multiprocessing
-import pickle as p
+import pickle as pickle
 
 class Schedule:
     
@@ -56,7 +56,7 @@ class Schedule:
             better_genome = better_AI.piece_weights
             worse_genome = worse_AI.piece_weights          
             for piece,score in better_genome.iteritems():
-                if rand() < self.recom_prob:
+                if random.random() < self.recom_prob:
                     worse_genome[piece] = score
         
     def mutate_genes(self,AI_list,generation_num):
@@ -64,10 +64,10 @@ class Schedule:
         for i in range(1,len(AI_list)): #mutate everything but the best AI
             genome = AI_list[i].piece_weights            
             for piece,score in genome.iteritems():
-                if rand() < self.mut_prob:
+                if random.random() < self.mut_prob:
                     mut_mag = self.mut_mag_calc_func(generation_num)
                     print mut_mag
-                    score += 2*(rand()-0.5)*mut_mag
+                    score += 2*(random.random()-0.5)*mut_mag
                     
 def anneal_sched_mut_mag(generation_num):
     mut_mag = None    
@@ -272,7 +272,7 @@ if __name__ == '__main__':
     s.run_schedule()
     with open('evolved_AI_pop.p', 'wb') as f:
         print "Saved to %s" % "evolved_AI_pop"
-        p.dump(s.final_AI_pop,f)
+        pickle.dump(s.final_AI_pop,f)
 #    t = SwissTournamentSimpleEval(4,2)
 #    print t.AI_list
 #    print t.game_dict
