@@ -4,7 +4,6 @@ Created on Sun Apr  6 00:58:55 2014
 
 @author: dchen
 """
-import numpy as np
 
 def terminal_eval_simple(chess,alpha,beta):
     """returns sum of individual evaluation functions"""

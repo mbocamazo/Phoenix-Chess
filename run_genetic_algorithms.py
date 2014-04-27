@@ -10,7 +10,6 @@ from ChessBoard import ChessBoard
 from ChessAI import ChessAI
 from multiprocessing import Pool
 import random
-from ChessClient import *
 import evaluation_functions
 import prune_functions
 import QFunctions
