@@ -14,7 +14,6 @@ import evaluation_functions
 import prune_functions
 import QFunctions
 import math
-#import multiprocessing
 import pickle as pickle
 
 class Schedule:
@@ -25,7 +24,7 @@ class Schedule:
         self.mut_prob = mut_prob
         self.mut_mag_calc_func = mut_mag_calc_func
         self.generations = generations
-        self.population_size = 8
+        self.population_size = 16
         self.tournaments = []
         self.final_AI_pop = None
         
@@ -69,11 +68,11 @@ class Schedule:
                     
 def anneal_sched_mut_mag(generation_num):
     mut_mag = None    
-    if 0 <= generation_num < 40:
+    if 0 <= generation_num < 16:
         mut_mag = 1-generation_num/40.0
-    if 40<= generation_num < 50:
+    if 16<= generation_num < 20:
         mut_mag = .1
-    if 50<= generation_num <= 55:
+    if 20<= generation_num <= 30:
         mut_mag = 0
     return mut_mag
                 
@@ -106,26 +105,28 @@ class SwissTournamentSimpleEvalExistingAI:
         self.round_num = int(math.ceil(math.log(AI_num,2)))
             
     def play_tourn(self):        
-#        for i in range(self.round_num):
-#            pool = Pool(processes=len(self.AI_list)/2)
-#            games = []
-#            for j in range(0,len(self.AI_list),2):
-#                p1 = self.AI_list[j]
-#                p2 = self.AI_list[j+1]
-#                g = Game(p1,p2)
-#                games.append(g)
-#                self.game_dict[g.id] = g
-#            pool.map(play_game,games) #parallelize game playing
-#            self.AI_list.sort(key=lambda x: x.tournament_score, reverse=True)
         for i in range(self.round_num):
+            pool = Pool(processes=len(self.AI_list)/2)
+            games = []
             for j in range(0,len(self.AI_list),2):
                 p1 = self.AI_list[j]
                 p2 = self.AI_list[j+1]
                 g = Game(p1,p2)
+                games.append(g)
                 self.game_dict[g.id] = g
-                g.play_game()
-        #SORT BY SCORE AT THE END OF A TOURNAMENT
+            pool.map(play_game,games) #parallelize game playing
+        #SORT BY SCORE AFTER EVERYTHING IS DONE
         self.AI_list.sort(key=lambda x: x.tournament_score, reverse=True)
+    
+#        for i in range(self.round_num):
+#            for j in range(0,len(self.AI_list),2):
+#                p1 = self.AI_list[j]
+#                p2 = self.AI_list[j+1]
+#                g = Game(p1,p2)
+#                self.game_dict[g.id] = g
+#                g.play_game()
+#        #SORT BY SCORE AT THE END OF A TOURNAMENT
+#        self.AI_list.sort(key=lambda x: x.tournament_score, reverse=True)
             
 def play_game(game):
     """helper function for multithreading"""
@@ -188,7 +189,7 @@ class SwissTournamentPairEval:
                 g = Game(p1,p2)
                 self.game_dict[g.id] = g
                 g.play_game()
-                self.AI_list.sort(key=lambda x: x.tournament_score, reverse=True)
+        self.AI_list.sort(key=lambda x: x.tournament_score, reverse=True)
             
             
 
@@ -275,7 +276,7 @@ def build_random_piece_dict():
     return piece_score_dict
    
 if __name__ == '__main__': 
-    s = Schedule(.25,.2,anneal_sched_mut_mag,16)
+    s = Schedule(.25,.2,anneal_sched_mut_mag,25)
     s.run_schedule()
     with open('evolved_AI_pop.p', 'wb') as f:
         print "Saved to %s" % "evolved_AI_pop"
