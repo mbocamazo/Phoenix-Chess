@@ -14,7 +14,7 @@ import evaluation_functions
 import prune_functions
 import QFunctions
 import math
-import multiprocessing
+#import multiprocessing
 import pickle as pickle
 
 class Schedule:
@@ -25,7 +25,7 @@ class Schedule:
         self.mut_prob = mut_prob
         self.mut_mag_calc_func = mut_mag_calc_func
         self.generations = generations
-        self.population_size = 4
+        self.population_size = 8
         self.tournaments = []
         self.final_AI_pop = None
         
@@ -38,12 +38,11 @@ class Schedule:
             self.tournaments.append(t)
             self.recombine_genes(AI_list) #order of list must be maintained         
             self.mutate_genes(AI_list,g) #order of list must be maintained
-            print "piece weights of AI of generation "+str(g)
             for ai in AI_list:
                 ai.tournament_score = 0
-#                print "AI "+ str(ai.id) +"'s piece weights"
-#                piece_weights = ai.piece_weights
-#                print piece_weights
+                ai.piece_weights_history.append(ai.piece_weights.copy())
+                piece_weights = ai.piece_weights
+                print piece_weights
         self.final_AI_pop = AI_list
         
     def recombine_genes(self,AI_list):
@@ -61,13 +60,12 @@ class Schedule:
         
     def mutate_genes(self,AI_list,generation_num):
         """doesnt modify order of AI list"""
-        for i in range(1,len(AI_list)): #mutate everything but the best AI
+        for i in range(1,len(AI_list)): #mutate everything but the best AI which is put first
             genome = AI_list[i].piece_weights            
             for piece,score in genome.iteritems():
                 if random.random() < self.mut_prob:
                     mut_mag = self.mut_mag_calc_func(generation_num)
-                    print mut_mag
-                    score += 2*(random.random()-0.5)*mut_mag
+                    genome[piece] += 2*(random.random()-0.5)*mut_mag
                     
 def anneal_sched_mut_mag(generation_num):
     mut_mag = None    
@@ -93,6 +91,7 @@ class TournamentAI(ChessAI):
             TournamentAI.last_initialized_id += 1
         self.id = TournamentAI.last_initialized_id
         self.games_played_id = {}        
+        self.piece_weights_history = []
         
 class SwissTournamentSimpleEvalExistingAI:    
     """runs a swiss tournament between a list of specified
@@ -107,17 +106,26 @@ class SwissTournamentSimpleEvalExistingAI:
         self.round_num = int(math.ceil(math.log(AI_num,2)))
             
     def play_tourn(self):        
+#        for i in range(self.round_num):
+#            pool = Pool(processes=len(self.AI_list)/2)
+#            games = []
+#            for j in range(0,len(self.AI_list),2):
+#                p1 = self.AI_list[j]
+#                p2 = self.AI_list[j+1]
+#                g = Game(p1,p2)
+#                games.append(g)
+#                self.game_dict[g.id] = g
+#            pool.map(play_game,games) #parallelize game playing
+#            self.AI_list.sort(key=lambda x: x.tournament_score, reverse=True)
         for i in range(self.round_num):
-            pool = Pool(processes=len(self.AI_list)/2)
-            games = []
             for j in range(0,len(self.AI_list),2):
                 p1 = self.AI_list[j]
                 p2 = self.AI_list[j+1]
                 g = Game(p1,p2)
-                games.append(g)
                 self.game_dict[g.id] = g
-            pool.map(play_game,games) #parallelize game playing
-            self.AI_list.sort(key=lambda x: x.tournament_score, reverse=True)
+                g.play_game()
+        #SORT BY SCORE AT THE END OF A TOURNAMENT
+        self.AI_list.sort(key=lambda x: x.tournament_score, reverse=True)
             
 def play_game(game):
     """helper function for multithreading"""
@@ -264,11 +272,10 @@ def build_random_piece_dict():
     for b in b_piece_list:
         rand_num = random.uniform(-10,0)
         piece_score_dict[b] = rand_num  
-        piece_score_dict[b.upper()] = -rand_num 
     return piece_score_dict
    
 if __name__ == '__main__': 
-    s = Schedule(.25,.2,anneal_sched_mut_mag,4)
+    s = Schedule(.25,.2,anneal_sched_mut_mag,16)
     s.run_schedule()
     with open('evolved_AI_pop.p', 'wb') as f:
         print "Saved to %s" % "evolved_AI_pop"

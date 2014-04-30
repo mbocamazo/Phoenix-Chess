@@ -1145,6 +1145,14 @@ class ChessBoard:
             kx,ky = self._black_king_location
         
         return self.isThreatened(kx,ky,self._turn)
+        
+    def someoneChecked(self):
+        """
+        Returns True if the either players king is checked.
+        """            
+        wkx,wky = self._white_king_location
+        bkx,bky = self._black_king_location
+        return self.isThreatened(wkx,wky,ChessBoard.WHITE) or self.isThreatened(bkx,bky,ChessBoard.BLACK)
              
     def isGameOver(self):
         """
