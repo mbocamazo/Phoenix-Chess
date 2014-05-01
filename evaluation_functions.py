@@ -27,7 +27,11 @@ def terminal_eval_simple(chess,alpha,beta):
                 else:
                     piece_dict[piece] = 1
         score += simple_material_eval(chess,piece_dict)
+        score += piece_table_pos_eval(chess,piece_dict)
         return score
+
+def piece_table_pos_eval(chess,piece_dict):
+    return 0
 
 def terminal_eval(chess,alpha,beta):
     """returns sum of individual evaluation functions"""

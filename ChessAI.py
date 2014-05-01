@@ -105,8 +105,8 @@ class ChessAI(Player):
         """negamax function.  Depth is a positive integer."""
         self.chess.nodesSearched += 1
         if (depth <= 0 or self.chess.isGameOver() or self.should_prune_func(self.chess)) and not self.should_go_deeper(self.chess,depth): 
-    #            board_weight = player_num * self.eval_func(self.chess,alpha,beta)     #use this line for all other eval funcs       
-                board_weight = player_num * self.eval_func(self.chess,alpha,beta,self.piece_weights) #this line is for the paired_piece_eval func        
+                board_weight = player_num * self.eval_func(self.chess,alpha,beta)     #use this line for all other eval funcs       
+#                board_weight = player_num * self.eval_func(self.chess,alpha,beta,self.piece_weights) #this line is for the paired_piece_eval func        
                 if is_top_layer:
                     "print: WARNING, negamax cut off search on first node, returning a random move!"
                     return board_weight,self.get_random_next_move()

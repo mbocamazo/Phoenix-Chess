@@ -10,7 +10,7 @@
 
 from copy import deepcopy
 from pprint import pprint
-from pygame import *
+import pygame
 
 #MB 03/30: Promotion options already written in, just need to remove hard coding
 #of Queen promotion value, maybe add a pop-up menu to select piece
@@ -1146,7 +1146,15 @@ class ChessBoard:
         else:
             kx,ky = self._black_king_location
         
-        return self.isThreatened(kx,ky,self._turn)
+        return self.isThreatened(kx,ky,self._turn)        
+        
+    def someoneChecked(self):
+        """
+        Returns True if the either players king is checked.
+        """            
+        wkx,wky = self._white_king_location
+        bkx,bky = self._black_king_location
+        return self.isThreatened(wkx,wky,ChessBoard.WHITE) or self.isThreatened(bkx,bky,ChessBoard.BLACK)             
              
     def isGameOver(self):
         """

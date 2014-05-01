@@ -1,21 +1,20 @@
 #/usr/bin/env python
 import os, pygame,math
-from pygame.locals import *
 from pprint import pprint
+from pygame.locals import *
 from ChessAI import *
 import evaluation_functions
 import prune_functions
 import QFunctions
 from copy import deepcopy
 from pprint import pprint
-import pygame
+import pygame 
 import run_genetic_algorithms
 from ChessBoard import ChessBoard
     
 class ChessClient:
 
     def mainLooptemp(self):     
-
         chess = ChessBoard()
         clock = pygame.time.Clock()
         screen = pygame.display.set_mode((480, 480),1)
@@ -23,18 +22,18 @@ class ChessClient:
         view = PyGameWindowView(chess,screen)
         controller = Controller(chess)        
         running = True
-#        
-        paired_piece_weights_1 = run_genetic_algorithms.build_random_pair_piece_dict()    
-        paired_piece_weights_2 = run_genetic_algorithms.build_random_pair_piece_dict()    
+              
+#        paired_piece_weights_1 = run_genetic_algorithms.build_random_pair_piece_dict()    
+#        paired_piece_weights_2 = run_genetic_algorithms.build_random_pair_piece_dict()    
         
         player_1 = Human(ChessBoard.WHITE)
-        player_2 = Human(ChessBoard.BLACK)
+#        player_2 = Human(ChessBoard.BLACK)
 #        AI1ply = 2
-#        player_1 = ChessAI(ChessBoard.WHITE,chess,evaluation_functions.terminal_paired_material_eval,
+#        player_1 = ChessAI(ChessBoard.WHITE,chess,evaluation_functions.terminal_eval_simple,
 #                           prune_functions.never_prune,QFunctions.simple_end_game,paired_piece_weights_1,AI1ply)
-#        AI2ply = 2
-#        player_2 = ChessAI(ChessBoard.BLACK,chess,evaluation_functions.terminal_paired_material_eval,
-#                           prune_functions.never_prune,QFunctions.simple_end_game,paired_piece_weights_2,AI2ply)
+        AI2ply = 4
+        player_2 = ChessAI(ChessBoard.BLACK,chess,evaluation_functions.terminal_eval_simple,
+                           prune_functions.never_prune,QFunctions.simple_end_game,None,AI2ply)
 ##        AI_color = ChessBoard.BLACK
 #        player_color = ChessBoard.WHITE
 #        human_player = Player(player_color)
@@ -44,7 +43,6 @@ class ChessClient:
         
         while running:
             clock.tick(30)        
-    
             if chess.getTurn() == player_1.color and not chess.isGameOver():
                 if type(player_1) == Human:
                     for event in pygame.event.get():
@@ -259,6 +257,6 @@ def main():
     
 #this calls the 'main' function when this script is executed
 if __name__ == '__main__': 
-    cProfile.run('main()')
+    main()
 
 
