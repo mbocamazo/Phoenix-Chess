@@ -7,13 +7,13 @@ Created on Sun Apr  6 00:58:55 2014
 import numpy as np
 from PieceTable import PieceTable
 
-def terminal_eval_simple(chess,alpha,beta):
+def terminal_eval_simple(chess,alpha,beta,layers_remaining):
     """returns sum of individual evaluation functions"""
     if chess.isGameOver():
         if chess.getGameResult() == 1:
-            score = 100000
+            score = 100000 + layers_remaining #faster checks are worth more
         elif chess.getGameResult() == 2:
-            score = -100000
+            score = -100000 - layers_remaining
         else:
             score = 0
         return score
@@ -29,9 +29,9 @@ def terminal_eval_simple(chess,alpha,beta):
                     piece_dict[piece] = 1
         score += simple_material_eval(chess,piece_dict) 
 #        if len(chess._state_stack) < 12:
-#        score += piece_table_pos_eval(chess,piece_dict)
+        score += piece_table_pos_eval(chess,piece_dict)/10.0 #to fix high piece weights
 #        else:
-#        score += simple_pos_eval(chess,board,piece_dict)/10.0 #to fix the overly high piece weights 
+        score += simple_pos_eval(chess,board,piece_dict)
         return score
 
 def piece_table_pos_eval(chess,piece_dict):
@@ -217,8 +217,7 @@ def simple_material_eval(chess,piece_dict):
     
 def simple_pos_eval(chess,board,piece_dict):
     """Analyzes positional control and returns numerical score"""
-    p_score = 0
-    p_score += simple_activity_eval(chess,board,piece_dict)
+    p_score = 01
     p_score += pawn_promo_eval(chess,board,piece_dict) #either, but not both (double counting)
 #    p_score += pawn_structure_eval(chess,board,piece_dict)
     return p_score

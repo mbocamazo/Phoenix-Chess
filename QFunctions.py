@@ -34,7 +34,7 @@ def end_game_piece_count(chess):
                     b_piece_count += 1
     if w_piece_count + b_piece_count < END_GAME_PIECE_COUNT:
         return True
-    if (w_piece_count <= 4 and b_piece_count <= 8) or (b_piece_count <= 4 and w_piece_count <= 8):
+    if (w_piece_count <= 4 and b_piece_count <= 10) or (b_piece_count <= 4 and w_piece_count <= 10):
         return True
     return False
 #    return min(w_piece_count,b_piece_count)
