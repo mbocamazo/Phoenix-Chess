@@ -5,6 +5,7 @@ Created on Sun Apr  6 00:58:55 2014
 @author: dchen
 """
 import numpy as np
+from PieceTable import PieceTable
 
 def terminal_eval_simple(chess,alpha,beta):
     """returns sum of individual evaluation functions"""
@@ -26,13 +27,27 @@ def terminal_eval_simple(chess,alpha,beta):
                     piece_dict[piece] += 1
                 else:
                     piece_dict[piece] = 1
-        score += simple_material_eval(chess,piece_dict)
-        score += piece_table_pos_eval(chess,piece_dict)
+        score += simple_material_eval(chess,piece_dict) 
+#        if len(chess._state_stack) < 12:
+#        score += piece_table_pos_eval(chess,piece_dict)
+#        else:
+#        score += simple_pos_eval(chess,board,piece_dict)/10.0 #to fix the overly high piece weights 
         return score
 
 def piece_table_pos_eval(chess,piece_dict):
-    return 0
-
+    piece_table_score = 0
+    board = chess.getShallowBoard()
+    location_dict = {}
+    p = PieceTable()
+    for row_num, row in enumerate(board):
+        for col_num, piece in enumerate(row):
+            if piece not in ['.','q','Q','r','R']:
+                location_dict[piece] = (row_num,col_num)
+    is_end_game = end_game_piece_count(chess)
+    for piece in location_dict:
+        piece_table_score += p.get_location_score(piece,location_dict[piece],is_end_game)
+    return piece_table_score
+        
 def terminal_eval(chess,alpha,beta):
     """returns sum of individual evaluation functions"""
     if chess.isGameOver():
@@ -302,5 +317,22 @@ def pawn_promo_eval(chess,board,piece_dict):
     
 def xor(p,q):
     return (not(p) and q) or (p and not(q))
+    
+def end_game_piece_count(chess):
+    board = chess.getShallowBoard()
+    w_piece_count = 0
+    b_piece_count = 0
+    for row in board:
+        for piece in row:
+            if piece != '.':
+                if 'A'<= piece <='Z':
+                    w_piece_count += 1
+                elif 'a'<= piece <='z':
+                    b_piece_count += 1
+    if w_piece_count + b_piece_count < 10:
+        return True
+    if w_piece_count <= 4 or b_piece_count <= 4:
+        return True
+    return False
 
          

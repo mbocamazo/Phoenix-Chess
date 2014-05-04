@@ -14,14 +14,14 @@ def simple_end_game(chess,depth):
 #    print "qfunc depth: "+str(depth)
     if depth <= MAXIMUM_DEPTH_EXTENSION or depth > 0:
         return False
-    if piece_count(chess) < END_GAME_PIECE_COUNT or chess.someoneChecked(): 
+    if end_game_piece_count(chess): 
     #if the board has less than a certain amount of pieces or check is going on, trigger deeper ply search
         return True
 
 def no_extension(chess,depth):
     return False    
     
-def piece_count(chess):
+def end_game_piece_count(chess):
     board = chess.getShallowBoard()
     w_piece_count = 0
     b_piece_count = 0
@@ -32,5 +32,9 @@ def piece_count(chess):
                     w_piece_count += 1
                 elif 'a'<= piece <='z':
                     b_piece_count += 1
-    return w_piece_count+b_piece_count
+    if w_piece_count + b_piece_count < END_GAME_PIECE_COUNT:
+        return True
+    if (w_piece_count <= 4 and b_piece_count <= 8) or (b_piece_count <= 4 and w_piece_count <= 8):
+        return True
+    return False
 #    return min(w_piece_count,b_piece_count)

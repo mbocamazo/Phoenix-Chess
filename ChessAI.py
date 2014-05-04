@@ -21,7 +21,7 @@ class Human(Player):
     def __init__(self,color):
         self.color = color
     def make_next_move(self):
-        print "You shouldn't be calling this function! I'm not an AI!"
+        pass
 
 class ChessAI(Player):
     BOARDWIDTH = 8
