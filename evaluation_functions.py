@@ -129,7 +129,7 @@ def terminal_paired_material_eval(chess,alpha,beta,paired_piece_weights):
                     piece_dict[piece] += 1
                 else:
                     piece_dict[piece] = 1
-        score += paired_material_eval(piece_dict,paired_piece_weights)
+        score += material_eval_of_pairs(piece_dict,paired_piece_weights)
 
         if score < alpha - 2 or score > beta + 2:
             return score
@@ -137,28 +137,27 @@ def terminal_paired_material_eval(chess,alpha,beta,paired_piece_weights):
         score += simple_pos_eval(chess,board,piece_dict)
         return score
         
-def paired_material_eval(piece_dict,paired_score_dict):
-    """scores the board based on pieces and pairs of pieces present. The AI
-    class passes this function paired_piece_weights when called through terminal_paired_material_eval, a dictionary
-    that is unique to every AI. pieces have
-    some intrinsic value and that value is modified based on the presence or lackthereof
-    of all other pieces. (exclulding pawns and kings)"""
-    single_score_dict = {'r':-5,'n':-3,'b':-3.25,'q':-9,'k':-10000,'p':-1,'.':0,'P':1,'R':5,'N':3,'B':3.25,'Q':9,'K':10000}
-    m_score = 0
-    for piece in piece_dict:
-        m_score += single_score_dict[piece]*piece_dict[piece]    
-    piece_dict.pop('.',None)
-    piece_dict.pop('k',None)
-    piece_dict.pop('K',None)
-    piece_dict.pop('p',None)
-    piece_dict.pop('P',None)#remove all pieces that aren't relevant to pair weighting
-    for p in piece_dict:
-        pair_dict = paired_score_dict[p]
-        for pair_piece in pair_dict:
-            if pair_piece in piece_dict:
-                m_score += pair_dict[pair_piece]*piece_dict[pair_piece]
-    return m_score
-        
+def material_eval_of_pairs(piece_dict,paired_score_dict):
+    """Evaluates the scores of piece pairs in themselves"""
+    pairs_scores = 0
+    piece_dict.__delitem__('.')
+    piece_dict.__delitem__('k')
+    piece_dict.__delitem__('K')
+    piece_dict.__delitem__('p')
+    piece_dict.__delitem__('P')
+    for pair_type in paired_score_dict:
+        if paired_score_dict[pair_type] == 'self_pair':
+            for piece in piece_dict:
+                if piece_dict==2:
+                    pairs_scores += paired_score_dict['self_pair'][piece]
+        else:
+            for piece in piece_dict:
+                try:
+                    pairs_scores += paired_score_dict[pair_type][piece]
+                except:
+                    pass
+    return pairs_scores    
+    
 def terminal_eval2(chess,alpha,beta):
     """returns sum of individual evaluation functions"""
     """returns sum of individual evaluation functions"""
