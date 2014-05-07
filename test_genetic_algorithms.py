@@ -10,14 +10,11 @@ from ChessBoard import ChessBoard
 from ChessAI import ChessAI
 from multiprocessing import Pool
 import random
-import pygame
-from ChessClient import *
 import evaluation_functions
 import prune_functions
 import QFunctions
 import math
-import multiprocessing
-import pickle 
+import pickle as pickle
 
 class Schedule:
     
@@ -27,26 +24,26 @@ class Schedule:
         self.mut_prob = mut_prob
         self.mut_mag_calc_func = mut_mag_calc_func
         self.generations = generations
-        self.population_size = 16
+        self.population_size = 2
         self.tournaments = []
         self.final_AI_pop = None
         
     def run_schedule(self):
-        AI_list = create_AI(self.population_size)
+        initial_tourn = SwissTournamentSimpleEvalNewAI(self.population_size,0)
+        AI_list = initial_tourn.AI_list
         for g in range(0,self.generations):
-            t = SwissTournamentSimpleEvalExistingAI(AI_list) 
-            AI_list = t.play_tourn()
-            AI_list.sort(key=lambda x: x.tournament_score, reverse=True) #this sorts AI by fitness
+            t = SwissTournamentSimpleEvalExistingAI(AI_list) #this sorts AI by fitness
+            t.play_tourn()
             self.tournaments.append(t)
+            print AI_list
+            AI_list.sort(key=lambda x: x.tournament_score, reverse=True)
+            print AI_list
             self.recombine_genes(AI_list) #order of list must be maintained         
             self.mutate_genes(AI_list,g) #order of list must be maintained
-            print "piece weights of AI of generation "+str(g)
-            for index, ai in enumerate(AI_list):
-                print "AI "+ str(ai.id) + " 's tournament score: "
+            for ai in AI_list:
                 print ai.tournament_score
                 ai.tournament_score = 0
                 ai.piece_weights_history.append(ai.piece_weights.copy())
-                ai.rank_history.append(index)
                 piece_weights = ai.piece_weights
                 print piece_weights
         self.final_AI_pop = AI_list
@@ -76,7 +73,7 @@ class Schedule:
 def anneal_sched_mut_mag(generation_num):
     mut_mag = None    
     if 0 <= generation_num < 16:
-        mut_mag = 1-generation_num/(16/.9)
+        mut_mag = 1-generation_num/40.0
     if 16<= generation_num < 20:
         mut_mag = .1
     if 20<= generation_num <= 30:
@@ -98,8 +95,12 @@ class TournamentAI(ChessAI):
         self.id = TournamentAI.last_initialized_id
         self.games_played_id = {}        
         self.piece_weights_history = []
-        self.rank_history = []
         
+    def __str__(self):
+        return "AI" + str(self.id)
+        
+    def __repr__(self):
+        return self.__str__()
         
 class SwissTournamentSimpleEvalExistingAI:    
     """runs a swiss tournament between a list of specified
@@ -116,47 +117,39 @@ class SwissTournamentSimpleEvalExistingAI:
     def play_tourn(self):        
         for i in range(self.round_num):
             pool = Pool(processes=len(self.AI_list)/2)
-            games = []
+            games = []         
             for j in range(0,len(self.AI_list),2):
                 p1 = self.AI_list[j]
                 p2 = self.AI_list[j+1]
+                print "playing game between AI "+str(p1.id) +" and AI "+str(p2.id)
                 g = Game(p1,p2)
-                g.pickle_order_id = j #save the order that games are pickled in so we can reload them in the same order
                 games.append(g)
                 self.game_dict[g.id] = g
             pool.map(play_game,games) #parallelize game playing
-            original_ai_list_length = len(self.AI_list)
-            self.AI_list = [] #now reset the AI_list and load the newly modified AI from the pickle files
-            for i in range(0,original_ai_list_length,2): #reload the ais back into the ai list
-                file_name = 'game_'+str(i)+'.p'
-                game = pickle.load(open(file_name,"rb"))      
-                ai_1 = game.w_player
-                ai_2 = game.b_player
-                self.AI_list.append(ai_1)
-                self.AI_list.append(ai_2)
-                os.remove(file_name)
-                
-        return self.AI_list
+            #threading means that the play_games function doesn't modify AI tournament scores!
+            #we need to find a way that thread and then returns the result of the game
+        
+        print "swiss tournament printing ai tournament scores"
+        for ai in self.AI_list:
+            print ai.tournament_score 
+        #SORT BY SCORE AFTER EVERYTHING IS DONE
+    
+#        for i in range(self.round_num):
+#            for j in range(0,len(self.AI_list),2):
+#                p1 = self.AI_list[j]
+#                p2 = self.AI_list[j+1]
+#                g = Game(p1,p2)
+#                self.game_dict[g.id] = g
+#                g.play_game()
+#        #SORT BY SCORE AT THE END OF A TOURNAMENT
+#        self.AI_list.sort(key=lambda x: x.tournament_score, reverse=True)
             
 def play_game(game):
     """helper function for multithreading"""
-    game.play_game() #interesting threading intricacy: the first line of play_game MUST call a game object function
-    game_number = game.pickle_order_id
-    file_name = 'game_'+str(game_number)+'.p'
-    with open(file_name, 'wb') as f:
-        pickle.dump(game,f)
-    
-def create_AI(AI_num):
-    assert AI_num%2 == 0
-    AI_list = []
-    for i in range(AI_num):
-        random_piece_dict = build_random_piece_dict()
-        AI = TournamentAI(evaluation_functions.terminal_dict_material_eval,
-             prune_functions.never_prune,QFunctions.simple_end_game,random_piece_dict,2)
-        AI_list.append(AI)
-    return AI_list
-
-
+    print "play_game function printing players it's modifying"
+    print game.w_player
+    print game.b_player
+    game.play_game()
     
 class SwissTournamentSimpleEvalNewAI:    
     """runs a swiss tournament between a specified number of
@@ -186,9 +179,9 @@ class SwissTournamentSimpleEvalNewAI:
                 g = Game(p1,p2)
                 self.game_dict[g.id] = g
                 g_list.append(g)
-            pool.map(g.play_game(),g_list)
+            pool.map(g.play_game(),g_list) #playing games in a new thread doesn't modify the tournament score!
             self.AI_list.sort(key=lambda x: x.tournament_score, reverse=True)
-            
+    
 class SwissTournamentPairEval:
     """runs a swiss tournament between a specified number of
     AI w/random pair weightings. Specified number must be an even number. 
@@ -215,7 +208,7 @@ class SwissTournamentPairEval:
                 g = Game(p1,p2)
                 self.game_dict[g.id] = g
                 g.play_game()
-                self.AI_list.sort(key=lambda x: x.tournament_score, reverse=True)
+        self.AI_list.sort(key=lambda x: x.tournament_score, reverse=True)
             
             
 
@@ -258,31 +251,29 @@ class Game:
         if r == 1:
             self.game_result = Game.WHITE_WIN
             self.w_player.tournament_score += 1
+            print self.w_player
+            print "play_game function printing tournament score of white player"
+            print self.w_player.tournament_score
         if r == 2:
             self.game_result = Game.BLACK_WIN
             self.b_player.tournament_score += 1
+            print self.b_player
+            print "play_game function printing tournament score of black player"
+            print self.b_player.tournament_score
         if r in [3,4,5]:
             self.w_player.tournament_score += .5
             self.b_player.tournament_score += .5
+            print self.w_player
+            print "play_game function printing tournament score of white player"
+            print self.w_player.tournament_score
+            print self.b_player
+            print "play_game function printing tournament score of black player"
+            print self.b_player.tournament_score
             self.game_result = Game.DRAW
         self.saved_moves = chess.getAllTextMoves()
         
     def get_game_result(self):
-        return self.game_result 
-    
-def build_random_piece_dict():
-    """generates a random piece dictionary that is used by the
-    material eval function. AI will store and pass this
-    dictionary/attribute to the material eval func.king and pawn weights
-    are defined elsewhere in the evaluate simple material func
-    since they aren't uniquely determined"""
-    piece_score_dict = {}
-    b_piece_list = ['r','n','b','q']
-    for b in b_piece_list:
-        rand_num = random.uniform(-10,0)
-        piece_score_dict[b] = rand_num  
-    return piece_score_dict
-    
+        return self.game_result
         
 def build_random_pair_piece_dict():
     """generates a random pair piece dictionary that is used by the
@@ -300,14 +291,29 @@ def build_random_pair_piece_dict():
         for n in no_p:
             inner_piece_dict[n] = random.uniform(-.5,.5) #random double between -1 and 1 for pair piece vals          
         pair_piece_dict[p] = inner_piece_dict
-    return pair_piece_dict    
-
+    return pair_piece_dict     
+    
+def build_random_piece_dict():
+    """generates a random piece dictionary that is used by the
+    material eval function. AI will store and pass this
+    dictionary/attribute to the material eval func.king and pawn weights
+    are defined elsewhere in the evaluate simple material func
+    since they aren't uniquely determined"""
+    piece_score_dict = {}
+    b_piece_list = ['r','n','b','q']
+    for b in b_piece_list:
+        rand_num = random.uniform(-10,0)
+        piece_score_dict[b] = rand_num  
+    return piece_score_dict
+   
 if __name__ == '__main__': 
-    s = Schedule(.25,.2,anneal_sched_mut_mag,25)
+    s = Schedule(.25,.2,anneal_sched_mut_mag,1)
     s.run_schedule()
-    with open('evolved_AI_pop.p', 'wb') as f:
-        print "Saved to %s" % "evolved_AI_pop"
-        pickle.dump(s.final_AI_pop,f)
+#    with open('evolved_AI_pop.p', 'wb') as f:
+#        print "Saved to %s" % "evolved_AI_pop"
+#        pickle.dump(s.final_AI_pop,f)
+        
+        
 #    t = SwissTournamentSimpleEval(4,2)
 #    print t.AI_list
 #    print t.game_dict
