@@ -119,8 +119,8 @@ class SwissTournamentSimpleEvalExistingAI:
                 games.append(g)
                 self.game_dict[g.id] = g
                 
-            pool.map(play_game,games) #parallelize game playing
-            self.AI_list.sort(key=lambda x: x.tournament_score, reverse=True)
+        pool.map(play_game,games) #parallelize game playing
+        self.AI_list.sort(key=lambda x: x.tournament_score, reverse=True)
             
 def play_game(game):
     """helper function for multithreading"""

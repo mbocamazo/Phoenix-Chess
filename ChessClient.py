@@ -8,7 +8,6 @@ import prune_functions
 import QFunctions
 from copy import deepcopy
 from pprint import pprint
-import pygame 
 import run_genetic_algorithms
 from ChessBoard import ChessBoard
     
