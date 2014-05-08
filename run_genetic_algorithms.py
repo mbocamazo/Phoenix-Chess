@@ -71,14 +71,14 @@ class Schedule:
             for piece,score in genome.iteritems():
                 if random.random() < self.mut_prob:
                     mut_mag = self.mut_mag_calc_func(generation_num)
-                    genome[piece] += 2*(random.random()-0.5)*mut_mag
+                    genome[piece] += 4*(random.random()-0.5)*mut_mag
                     
 def anneal_sched_mut_mag(generation_num):
     mut_mag = None    
     if 0 <= generation_num < 16:
-        mut_mag = 1-generation_num/(16/.9)
+        mut_mag = 1-generation_num/(16/.95)
     if 16<= generation_num < 20:
-        mut_mag = .1
+        mut_mag = .05
     if 20<= generation_num <= 30:
         mut_mag = 0
     return mut_mag
