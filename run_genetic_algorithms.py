@@ -10,14 +10,13 @@ from ChessBoard import ChessBoard
 from ChessAI import ChessAI
 from multiprocessing import Pool
 import random
-import pygame
-from ChessClient import *
 import evaluation_functions
 import prune_functions
 import QFunctions
 import math
 import multiprocessing
 import pickle 
+import os
 
 class Schedule:
     
@@ -308,25 +307,3 @@ if __name__ == '__main__':
     with open('evolved_AI_pop.p', 'wb') as f:
         print "Saved to %s" % "evolved_AI_pop"
         pickle.dump(s.final_AI_pop,f)
-#    t = SwissTournamentSimpleEval(4,2)
-#    print t.AI_list
-#    print t.game_dict
-#    t.play_tourn()
-#    print t.AI_list
-#    print t.game_dict
-#    piece_dict_w = build_random_pair_piece_dict()
-#    piece_dict_b = build_random_pair_piece_dict()
-#    AI_w_ply = 2
-#    AI_b_ply = 2
-#    #AI colors and chess models are set inside of the Game object
-#    player_w = ChessAI(None,None,evaluation_functions.terminal_paired_material_eval,
-#                       prune_functions.never_prune,QFunctions.simple_end_game,piece_dict_w,
-#                       AI_w_ply)
-#    player_b = ChessAI(None,None,evaluation_functions.terminal_paired_material_eval,
-#                       prune_functions.never_prune,QFunctions.simple_end_game,piece_dict_b,
-#                       AI_b_ply)
-#    test_g = Game(player_w,player_b)
-#    test_g.play_game()
-#    print test_g.saved_moves
-#    print "game result: " + str(test_g.get_game_result())
-#    watch_game(test_g.saved_moves)
