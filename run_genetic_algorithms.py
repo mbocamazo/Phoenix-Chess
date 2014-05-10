@@ -151,7 +151,7 @@ def create_AI(AI_num):
     for i in range(AI_num):
         random_piece_dict = build_random_piece_dict()
         AI = TournamentAI(evaluation_functions.terminal_dict_material_eval,
-             prune_functions.never_prune,QFunctions.simple_end_game,random_piece_dict,2)
+             prune_functions.never_prune,QFunctions.no_extension,random_piece_dict,4)
         AI_list.append(AI)
     return AI_list
 
