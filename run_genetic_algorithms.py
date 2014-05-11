@@ -54,7 +54,6 @@ class Schedule:
         """doesnt modify order of AI list"""
         AI_num = len(AI_list)
         quartile = AI_num/4         
-        for i in range(0,quartile):
             better_AI = AI_list[i]
             worse_AI = AI_list[-(i+1)]
             better_genome = better_AI.piece_weights
@@ -151,7 +150,7 @@ def create_AI(AI_num):
     for i in range(AI_num):
         random_piece_dict = build_random_piece_dict()
         AI = TournamentAI(evaluation_functions.terminal_dict_material_eval,
-             prune_functions.never_prune,QFunctions.no_extension,random_piece_dict,4)
+             prune_functions.never_prune,QFunctions.simple_end_game,random_piece_dict,2)
         AI_list.append(AI)
     return AI_list
 
