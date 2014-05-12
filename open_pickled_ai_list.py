@@ -16,6 +16,7 @@ import QFunctions
 import math
 import multiprocessing
 import pickle as p
+import numpy
 
 pickle_file = "evolved_AI_pop.p"
 ai_list = p.load(open(pickle_file,"rb"))
