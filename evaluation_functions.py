@@ -218,6 +218,7 @@ def simple_material_eval(chess,piece_dict):
 def simple_pos_eval(chess,board,piece_dict):
     """Analyzes positional control and returns numerical score"""
     p_score = 0 #this said 01 earlier??
+    p_score += simple_activity_eval(chess,board,piece_dict)
     p_score += pawn_promo_eval(chess,board,piece_dict) #either, but not both (double counting)
 #    p_score += pawn_structure_eval(chess,board,piece_dict)
     return p_score
