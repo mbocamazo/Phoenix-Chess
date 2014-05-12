@@ -22,7 +22,7 @@ ai_list = p.load(open(pickle_file,"rb"))
 
 history_avg_piece_weights = []
 
-for i in range(len(ai.piece_weights_history)):
+for i in range(len(ai_list[0].piece_weights_history)):
     avg_piece_weights = {'q':0,'r':0,'b':0,'n':0}
     for ai in ai_list:
         piece_weights = ai.piece_weights_history[i]
