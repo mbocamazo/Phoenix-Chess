@@ -53,7 +53,8 @@ class Schedule:
     def recombine_genes(self,AI_list):
         """doesnt modify order of AI list"""
         AI_num = len(AI_list)
-        quartile = AI_num/4         
+        quartile = AI_num/4  
+        for i in range(0,quartile):
             better_AI = AI_list[i]
             worse_AI = AI_list[-(i+1)]
             better_genome = better_AI.piece_weights
