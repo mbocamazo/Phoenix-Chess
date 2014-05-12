@@ -17,7 +17,7 @@ import math
 import multiprocessing
 import pickle as p
 
-pickle_file = "evolved_AI_pop.p"
+pickle_file = "evolved_AI_pop_1_saved.p"
 ai_list = p.load(open(pickle_file,"rb"))
 
 history_avg_piece_weights = []
