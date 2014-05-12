@@ -17,9 +17,8 @@ import math
 import multiprocessing
 import pickle as p
 
-pickle_file = "evolved_AI_pop_1_saved.p"
+pickle_file = "evolved_AI_pop.p"
 ai_list = p.load(open(pickle_file,"rb"))
-
 history_avg_piece_weights = []
 
 for i in range(len(ai_list[0].piece_weights_history)):
@@ -27,8 +26,10 @@ for i in range(len(ai_list[0].piece_weights_history)):
     for ai in ai_list:
         piece_weights = ai.piece_weights_history[i]
         for key in piece_weights:
+            print key
             avg_piece_weights[key] = avg_piece_weights[key] + piece_weights[key]
-    avg_piece_weights[key] = avg_piece_weights[key]/16.0
+    for key in avg_piece_weights:
+        avg_piece_weights[key] = avg_piece_weights[key]/16.0
     history_avg_piece_weights.append(avg_piece_weights)
     
 print history_avg_piece_weights
