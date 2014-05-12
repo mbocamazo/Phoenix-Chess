@@ -30,8 +30,8 @@ class ChessClient:
 #        AI1ply = 2
 #        player_1 = ChessAI(ChessBoard.WHITE,chess,evaluation_functions.terminal_eval_simple,
 #                           prune_functions.never_prune,QFunctions.simple_end_game,paired_piece_weights_1,AI1ply)
-        AI2ply = 4
-        player_2 = ChessAI(ChessBoard.BLACK,chess,evaluation_functions.terminal_eval_simple,
+        AI2ply = 2
+        player_2 = ChessAI(ChessBoard.BLACK,chess,evaluation_functions.terminal_eval,
                            prune_functions.never_prune,QFunctions.no_extension,None,AI2ply)
 ##        AI_color = ChessBoard.BLACK
 #        player_color = ChessBoard.WHITE
